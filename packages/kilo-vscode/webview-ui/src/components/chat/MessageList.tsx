@@ -106,10 +106,8 @@ export const MessageList: Component<MessageListProps> = (props) => {
             </div>
           </Show>
           <Show when={isEmpty()}>
-            <div class="message-list-empty-header">
-              <AccountSwitcher class="account-switcher-welcome" />
-            </div>
             <div class="message-list-empty">
+              <AccountSwitcher class="account-switcher-welcome" />
               <KiloLogo />
               <p class="kilo-about-text">{language.t("session.messages.welcome")}</p>
               <Show when={recent().length > 0 && props.onSelectSession}>
