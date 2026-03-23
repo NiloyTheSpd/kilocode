@@ -3,7 +3,7 @@
 
 export const dict = {
   "kilocode:autocomplete.statusBar.enabled": "$(kilo-logo) Autocomplete",
-  "kilocode:autocomplete.statusBar.snoozed": "gesluimerd",
+  "kilocode:autocomplete.statusBar.snoozed": "gepauzeerd",
   "kilocode:autocomplete.statusBar.warning": "$(warning) Autocomplete",
   "kilocode:autocomplete.statusBar.tooltip.basic": "Kilo Code Autocomplete",
   "kilocode:autocomplete.statusBar.tooltip.disabled": "Kilo Code Autocomplete (uitgeschakeld)",
