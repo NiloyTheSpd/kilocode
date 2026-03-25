@@ -34,10 +34,11 @@ export namespace Snapshot {
       .then(() => true)
       .catch(() => false)
     if (!exists) return
-    const result = await $`git -c core.autocrlf=false -c core.longpaths=true -c core.symlinks=true --git-dir ${git} --work-tree ${Instance.worktree} gc --prune=${prune}`
-      .quiet()
-      .cwd(Instance.directory)
-      .nothrow()
+    const result =
+      await $`git -c core.autocrlf=false -c core.longpaths=true -c core.symlinks=true --git-dir ${git} --work-tree ${Instance.worktree} gc --prune=${prune}`
+        .quiet()
+        .cwd(Instance.directory)
+        .nothrow()
     if (result.exitCode !== 0) {
       log.warn("cleanup failed", {
         exitCode: result.exitCode,
@@ -240,12 +241,13 @@ export namespace Snapshot {
             .quiet()
             .nothrow()
             .text()
+      const oversized = before.length > 256 * 1024 || after.length > 256 * 1024
       const added = isBinaryFile ? 0 : parseInt(additions)
       const deleted = isBinaryFile ? 0 : parseInt(deletions)
       result.push({
         file,
-        before,
-        after,
+        before: oversized ? "" : before,
+        after: oversized ? "" : after,
         additions: Number.isFinite(added) ? added : 0,
         deletions: Number.isFinite(deleted) ? deleted : 0,
         status: status.get(file) ?? "modified",
