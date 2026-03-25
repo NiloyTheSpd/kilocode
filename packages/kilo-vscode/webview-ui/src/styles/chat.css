@@ -176,6 +176,71 @@
   padding: 8px 12px 0;
 }
 
+.session-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.session-actions-row > * {
+  flex: 1 1 0;
+  min-width: fit-content;
+}
+
+/* Tooltip wrapper divs must fill their flex space, and buttons inside must fill the wrapper */
+.session-actions-row > [data-component="tooltip-trigger"] {
+  display: flex;
+}
+
+.session-actions-row > [data-component="tooltip-trigger"] > [data-component="button"] {
+  flex: 1;
+}
+
+/* Diff stats tooltip wrapper — don't grow, push right */
+.session-diff-wrapper {
+  flex: 0 0 auto !important;
+  margin-left: auto;
+}
+
+/* Diff stats badge — matches Agent Manager diff toggle style */
+.session-diff-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-editor-font-family), monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.session-diff-badge:hover {
+  background: var(--vscode-toolbar-hoverBackground);
+}
+
+.session-diff-badge [data-component="icon"] {
+  opacity: 0.7;
+}
+
+.session-diff-files {
+  color: var(--vscode-descriptionForeground);
+}
+
+.session-diff-add {
+  color: #34d399;
+}
+
+.session-diff-del {
+  color: #f87171;
+}
+
 /* ============================================
    Message List
    ============================================ */

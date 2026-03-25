@@ -223,9 +223,9 @@ const AppContent: Component = () => {
 
   return (
     <div class="container">
-      <Switch fallback={<ChatView />}>
+      <Switch fallback={<ChatView continueInWorktree />}>
         <Match when={currentView() === "newTask"}>
-          <ChatView onSelectSession={handleSelectSession} onShowHistory={() => setCurrentView("history")} />
+          <ChatView onSelectSession={handleSelectSession} onShowHistory={() => setCurrentView("history")} continueInWorktree/>
         </Match>
         <Match when={currentView() === "marketplace"}>
           <MarketplaceView />

@@ -416,6 +416,11 @@ interface AbortIn {
   sessionID: string
 }
 
+interface ContinueInWorktreeIn {
+  type: "continueInWorktree"
+  sessionId: string
+}
+
 /** All messages the Agent Manager expects from the webview (onMessage input). */
 export type AgentManagerInMessage =
   | CreateWorktreeIn
@@ -457,3 +462,4 @@ export type AgentManagerInMessage =
   | LoadMessagesIn
   | ClearSessionIn
   | AbortIn
+  | ContinueInWorktreeIn
