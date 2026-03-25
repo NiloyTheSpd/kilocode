@@ -830,7 +830,7 @@ export const dict = {
   "session.delete.button": "Izbriši sesiju",
   "session.untitled": "Bez naslova",
   "session.recent": "Nedavne",
-  "session.showHistory": "Show History",
+  "session.showHistory": "Prikaži historiju",
   "session.search.placeholder": "Pretraži sesije...",
   "session.empty": "Još nema sesija. Kliknite + za početak novog razgovora.",
   "session.tab.local": "Local",

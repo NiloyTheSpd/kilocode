@@ -812,7 +812,7 @@ export const dict = {
   "session.delete.button": "删除会话",
   "session.untitled": "无标题",
   "session.recent": "最近",
-  "session.showHistory": "Show History",
+  "session.showHistory": "显示历史",
   "session.search.placeholder": "搜索会话...",
   "session.empty": "暂无会话。点击 + 开始新的对话。",
   "session.tab.local": "Local",

@@ -837,7 +837,7 @@ export const dict = {
   "session.delete.button": "Supprimer la session",
   "session.untitled": "Sans titre",
   "session.recent": "Récentes",
-  "session.showHistory": "Show History",
+  "session.showHistory": "Afficher l'historique",
   "session.search.placeholder": "Rechercher des sessions...",
   "session.empty": "Aucune session pour l'instant. Cliquez + pour démarrer une nouvelle conversation.",
   "session.tab.local": "Local",

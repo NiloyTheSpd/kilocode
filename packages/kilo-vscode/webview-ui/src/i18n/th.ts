@@ -820,7 +820,7 @@ export const dict = {
   "session.delete.button": "ลบเซสชัน",
   "session.untitled": "ไม่มีชื่อ",
   "session.recent": "ล่าสุด",
-  "session.showHistory": "Show History",
+  "session.showHistory": "แสดงประวัติ",
   "session.search.placeholder": "ค้นหาเซสชัน...",
   "session.empty": "ยังไม่มีเซสชัน คลิก + เพื่อเริ่มการสนทนาใหม่",
   "session.tab.local": "Local",

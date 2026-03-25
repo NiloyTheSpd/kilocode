@@ -822,7 +822,7 @@ export const dict = {
   "session.delete.button": "セッションを削除",
   "session.untitled": "無題",
   "session.recent": "最近",
-  "session.showHistory": "Show History",
+  "session.showHistory": "履歴を表示",
   "session.search.placeholder": "セッションを検索...",
   "session.empty": "セッションがありません。+ をクリックして新しい会話を始めましょう。",
   "session.tab.local": "Local",

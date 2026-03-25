@@ -824,7 +824,7 @@ export const dict = {
   "session.delete.button": "Slet session",
   "session.untitled": "Unavngivet",
   "session.recent": "Seneste",
-  "session.showHistory": "Show History",
+  "session.showHistory": "Vis historik",
   "session.search.placeholder": "Søg sessioner...",
   "session.empty": "Ingen sessioner endnu. Klik + for at starte en ny samtale.",
   "session.tab.local": "Local",

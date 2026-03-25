@@ -825,7 +825,7 @@ export const dict = {
   "session.delete.button": "Oturumu sil",
   "session.untitled": "Adsız",
   "session.recent": "Son",
-  "session.showHistory": "Show History",
+  "session.showHistory": "Geçmişi Göster",
   "session.search.placeholder": "Oturum ara...",
   "session.empty": "Henüz oturum yok. Yeni bir sohbet başlatmak için + tıklayın.",
   "session.tab.local": "Local",

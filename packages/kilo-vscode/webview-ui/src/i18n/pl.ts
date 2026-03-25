@@ -827,7 +827,7 @@ export const dict = {
   "session.delete.button": "Usuń sesję",
   "session.untitled": "Bez tytułu",
   "session.recent": "Ostatnie",
-  "session.showHistory": "Show History",
+  "session.showHistory": "Pokaż historię",
   "session.search.placeholder": "Szukaj sesji...",
   "session.empty": "Brak sesji. Kliknij + aby rozpocząć nową rozmowę.",
   "session.tab.local": "Local",

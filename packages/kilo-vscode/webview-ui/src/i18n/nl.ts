@@ -823,7 +823,7 @@ export const dict = {
   "session.delete.button": "Verwijder sessie",
   "session.untitled": "Naamloos",
   "session.recent": "Recent",
-  "session.showHistory": "Show History",
+  "session.showHistory": "Geschiedenis weergeven",
   "session.search.placeholder": "Zoek sessies...",
   "session.empty": "Nog geen sessies. Klik op + om een nieuw gesprek te starten.",
   "session.tab.local": "Local",

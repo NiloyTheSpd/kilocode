@@ -823,7 +823,7 @@ export const dict = {
   "session.delete.button": "세션 삭제",
   "session.untitled": "제목 없음",
   "session.recent": "최근",
-  "session.showHistory": "Show History",
+  "session.showHistory": "기록 보기",
   "session.search.placeholder": "세션 검색...",
   "session.empty": "아직 세션이 없습니다. +를 클릭하여 새 대화를 시작하세요.",
   "session.tab.local": "Local",
