@@ -248,6 +248,9 @@ export namespace Skill {
     if (!name) {
       throw new RemoveError({ location: resolved, message: "skill not found in registry" })
     }
+    if (s.skills[name].location === BUILTIN_LOCATION) {
+      throw new RemoveError({ location, message: "cannot remove built-in skill" })
+    }
     const dir = path.dirname(resolved)
     await rm(dir, { recursive: true, force: true })
     delete s.skills[name]
