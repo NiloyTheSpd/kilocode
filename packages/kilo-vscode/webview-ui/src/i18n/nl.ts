@@ -1300,8 +1300,8 @@ export const dict = {
   "settings.saveBar.warning.many": "Meerdere sessies zijn actief en worden onderbroken",
   "settings.saveBar.saveAnyway": "Toch opslaan",
   "settings.saveBar.cancel": "Annuleren",
-  "notifications.action.previous": "Previous",
-  "notifications.action.next": "Next",
-  "notifications.action.close": "Close",
-  "notifications.action.tryModel": "Try {{model}}",
+  "notifications.action.previous": "Vorige",
+  "notifications.action.next": "Volgende",
+  "notifications.action.close": "Sluiten",
+  "notifications.action.tryModel": "Probeer {{model}}",
 }

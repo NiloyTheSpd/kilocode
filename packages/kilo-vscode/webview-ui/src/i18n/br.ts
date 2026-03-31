@@ -1308,8 +1308,8 @@ export const dict = {
   "settings.saveBar.warning.many": "Várias sessões estão em execução e serão interrompidas",
   "settings.saveBar.saveAnyway": "Salvar mesmo assim",
   "settings.saveBar.cancel": "Cancelar",
-  "notifications.action.previous": "Previous",
-  "notifications.action.next": "Next",
-  "notifications.action.close": "Close",
-  "notifications.action.tryModel": "Try {{model}}",
+  "notifications.action.previous": "Anterior",
+  "notifications.action.next": "Próximo",
+  "notifications.action.close": "Fechar",
+  "notifications.action.tryModel": "Experimentar {{model}}",
 }

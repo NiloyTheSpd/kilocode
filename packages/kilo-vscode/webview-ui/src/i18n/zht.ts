@@ -1258,8 +1258,8 @@ export const dict = {
   "settings.saveBar.warning.many": "多個工作階段正在執行，將被中斷",
   "settings.saveBar.saveAnyway": "仍然儲存",
   "settings.saveBar.cancel": "取消",
-  "notifications.action.previous": "Previous",
-  "notifications.action.next": "Next",
-  "notifications.action.close": "Close",
-  "notifications.action.tryModel": "Try {{model}}",
+  "notifications.action.previous": "上一個",
+  "notifications.action.next": "下一個",
+  "notifications.action.close": "關閉",
+  "notifications.action.tryModel": "嘗試 {{model}}",
 } satisfies Partial<Record<Keys, string>>

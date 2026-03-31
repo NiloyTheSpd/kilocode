@@ -1294,8 +1294,8 @@ export const dict = {
   "settings.saveBar.warning.many": "複数のセッションが実行中で中断されます",
   "settings.saveBar.saveAnyway": "それでも保存",
   "settings.saveBar.cancel": "キャンセル",
-  "notifications.action.previous": "Previous",
-  "notifications.action.next": "Next",
-  "notifications.action.close": "Close",
-  "notifications.action.tryModel": "Try {{model}}",
+  "notifications.action.previous": "前へ",
+  "notifications.action.next": "次へ",
+  "notifications.action.close": "閉じる",
+  "notifications.action.tryModel": "{{model}}を試す",
 }
