@@ -1260,7 +1260,6 @@ export const dict = {
   "settings.saveBar.warning.many": "多个会话正在运行，将被中断",
   "settings.saveBar.saveAnyway": "仍然保存",
   "settings.saveBar.cancel": "取消",
-  "notifications.action.previous": "上一个",
   "notifications.action.next": "下一个",
   "notifications.action.close": "关闭",
   "notifications.action.tryModel": "尝试 {{model}}",

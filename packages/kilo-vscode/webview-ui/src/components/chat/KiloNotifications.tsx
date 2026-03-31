@@ -119,7 +119,7 @@ export const KiloNotifications: Component = () => {
             <div class="kilo-notifications-next-group">
               <Show when={safeIndex() > 0}>
                 <button class="kilo-notifications-back-link" onClick={() => setIndex(safeIndex() - 1)}>
-                  {language.t("notifications.action.previous")}
+                  {language.t("common.goBack")}
                 </button>
               </Show>
               <button class="kilo-notifications-primary-btn" onClick={handleNext}>

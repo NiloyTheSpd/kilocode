@@ -1309,7 +1309,6 @@ export const dict = {
   "settings.saveBar.warning.many": "Nekoliko sesija je pokrenuto i bit će prekinuto",
   "settings.saveBar.saveAnyway": "Spremi svejedno",
   "settings.saveBar.cancel": "Otkaži",
-  "notifications.action.previous": "Prethodni",
   "notifications.action.next": "Sljedeći",
   "notifications.action.close": "Zatvori",
   "notifications.action.tryModel": "Probaj {{model}}",

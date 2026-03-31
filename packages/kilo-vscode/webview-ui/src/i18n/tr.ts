@@ -1298,7 +1298,6 @@ export const dict = {
   "settings.saveBar.warning.many": "Birden fazla oturum çalışıyor ve kesintiye uğrayacak",
   "settings.saveBar.saveAnyway": "Yine de kaydet",
   "settings.saveBar.cancel": "İptal",
-  "notifications.action.previous": "Önceki",
   "notifications.action.next": "Sonraki",
   "notifications.action.close": "Kapat",
   "notifications.action.tryModel": "Dene {{model}}",

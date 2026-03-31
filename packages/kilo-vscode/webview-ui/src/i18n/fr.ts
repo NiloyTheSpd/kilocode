@@ -1330,7 +1330,6 @@ export const dict = {
   "settings.saveBar.warning.many": "Plusieurs sessions sont en cours et seront interrompues",
   "settings.saveBar.saveAnyway": "Enregistrer quand même",
   "settings.saveBar.cancel": "Annuler",
-  "notifications.action.previous": "Précédent",
   "notifications.action.next": "Suivant",
   "notifications.action.close": "Fermer",
   "notifications.action.tryModel": "Essayer {{model}}",

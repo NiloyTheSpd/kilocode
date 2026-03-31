@@ -1300,7 +1300,6 @@ export const dict = {
   "settings.saveBar.warning.many": "Flere sessioner kører og vil blive afbrudt",
   "settings.saveBar.saveAnyway": "Gem alligevel",
   "settings.saveBar.cancel": "Annuller",
-  "notifications.action.previous": "Forrige",
   "notifications.action.next": "Næste",
   "notifications.action.close": "Luk",
   "notifications.action.tryModel": "Prøv {{model}}",

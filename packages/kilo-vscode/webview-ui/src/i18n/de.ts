@@ -1327,7 +1327,6 @@ export const dict = {
   "settings.saveBar.warning.many": "Mehrere Sitzungen laufen und werden unterbrochen",
   "settings.saveBar.saveAnyway": "Trotzdem speichern",
   "settings.saveBar.cancel": "Abbrechen",
-  "notifications.action.previous": "Zurück",
   "notifications.action.next": "Weiter",
   "notifications.action.close": "Schließen",
   "notifications.action.tryModel": "{{model}} ausprobieren",

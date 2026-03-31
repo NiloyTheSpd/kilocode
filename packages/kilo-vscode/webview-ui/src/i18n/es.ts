@@ -1317,7 +1317,6 @@ export const dict = {
   "settings.saveBar.warning.many": "Varias sesiones están en ejecución y se interrumpirán",
   "settings.saveBar.saveAnyway": "Guardar de todas formas",
   "settings.saveBar.cancel": "Cancelar",
-  "notifications.action.previous": "Anterior",
   "notifications.action.next": "Siguiente",
   "notifications.action.close": "Cerrar",
   "notifications.action.tryModel": "Probar {{model}}",
