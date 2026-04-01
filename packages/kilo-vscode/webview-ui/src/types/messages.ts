@@ -1152,6 +1152,10 @@ export interface DiffViewerLoadingMessage {
   loading: boolean
 }
 
+export interface ClearPendingPromptsMessage {
+  type: "clearPendingPrompts"
+}
+
 // ============================================
 // Marketplace Messages
 // ============================================
@@ -1338,6 +1342,7 @@ export type ExtensionMessage =
   | ContinueInWorktreeProgressMessage
   | WorktreeStatsLoadedMessage
   | McpStatusLoadedMessage
+  | ClearPendingPromptsMessage
 
 // ============================================
 // Messages FROM webview TO extension

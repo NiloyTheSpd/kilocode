@@ -65,6 +65,7 @@ import {
 import {
   handlePermissionResponse,
   fetchAndSendPendingPermissions,
+  recoveryDirs,
   type PermissionContext,
 } from "./kilo-provider/handlers/permission-handler"
 import { handleQuestionReply, handleQuestionReject } from "./kilo-provider/handlers/question"
@@ -1988,6 +1989,10 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
     // races with the async config.update() write on the CLI backend).
     this.pending++
     try {
+      // Reject all pending permissions and questions so their CLI-side
+      // Promises resolve before disposeAll() wipes Instance state.
+      await this.drainPendingPrompts()
+
       await this.client.global.config.update({ config: partial }, { throwOnError: true })
 
       // Re-fetch the full merged config (global + project + all layers) so the
@@ -1999,6 +2004,11 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
 
       this.cachedConfigMessage = { type: "configLoaded", config: merged }
       this.postMessage({ type: "configUpdated", config: merged })
+
+      // Clear stale permission/question UI after the dispose cycle.
+      // The drain above resolved them on the CLI side, but SSE events
+      // may race with the dispose — this ensures the webview is clean.
+      this.postMessage({ type: "clearPendingPrompts" })
 
       if (refreshProviders) {
         await this.fetchAndSendProviders()
@@ -2020,10 +2030,29 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
   }
 
   /**
-   * Handle sending a message from the webview.
-   * Uses promptAsync (fire-and-forget) — the server queues concurrent prompts
-   * internally, so the client doesn't need to block on busy sessions.
+   * Reject all pending permission requests and questions across all tracked
+   * directories. Called before config saves that trigger Instance.disposeAll()
+   * on the CLI backend, to prevent orphaned Promises from freezing sessions.
    */
+  private async drainPendingPrompts(): Promise<void> {
+    if (!this.client) return
+    const dirs = recoveryDirs(this.getWorkspaceDirectory(), this.sessionDirectories)
+    for (const dir of dirs) {
+      const { data: perms } = await this.client.permission.list({ directory: dir })
+      if (perms) {
+        for (const perm of perms) {
+          await this.client.permission.reply({ requestID: perm.id, reply: "reject", directory: dir })
+        }
+      }
+      const { data: qs } = await this.client.question.list({ directory: dir })
+      if (qs) {
+        for (const q of qs) {
+          await this.client.question.reject({ requestID: q.id, directory: dir })
+        }
+      }
+    }
+  }
+
   /**
    * Ensure a session exists, creating one if needed. Returns the resolved
    * session ID and workspace directory, or undefined when the client is
