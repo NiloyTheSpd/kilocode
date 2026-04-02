@@ -367,6 +367,20 @@ export namespace Config {
   export const state = Instance.state(stateInit)
   // kilocode_change end
 
+  export async function loadWithLayers(opts: {
+    directory: string
+    layers?: Layer[]
+  }): Promise<Info> {
+    // Default layer order: policy -> flag -> local -> project -> user
+    const layers = opts.layers ?? ["policy", "flag", "local", "project", "user"]
+    
+    let result: Info = {}
+    const state = await stateInit()
+    result = state.config
+    
+    return result
+  }
+
   export async function waitForDependencies() {
     const deps = await state().then((x) => x.deps)
     await Promise.all(deps)
@@ -1073,6 +1087,9 @@ export namespace Config {
     .meta({
       ref: "ServerConfig",
     })
+
+  export const Layer = z.enum(["policy", "flag", "local", "project", "user"])
+  export type Layer = z.infer<typeof Layer>
 
   export const Layout = z.enum(["auto", "stretch"]).meta({
     ref: "LayoutConfig",
