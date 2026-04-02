@@ -165,6 +165,9 @@ export const dict = {
   "model.tag.free": "Ücretsiz",
   "model.tag.latest": "En yeni",
   "model.group.recommended": "Önerilen",
+  "model.group.favorites": "Favoriler",
+  "model.favorite.add": "Favorilere ekle",
+  "model.favorite.remove": "Favorilerden çıkar",
   "model.provider.anthropic": "Anthropic",
   "model.provider.openai": "OpenAI",
   "model.provider.google": "Google",
@@ -993,6 +996,11 @@ export const dict = {
   "settings.aboutKiloCode.importSettings.success":
     "Ayarlar içe aktarıldı. Yukarıdaki değişiklikleri gözden geçirin, ardından Kaydet'e tıklayın.",
 
+  "settings.aboutKiloCode.telemetry.title": "Telemetri",
+  "settings.aboutKiloCode.telemetry.description":
+    "Telemetri, VS Code'un yerleşik telemetri ayarı tarafından kontrol edilir. Devre dışı bırakmak için Ayarlar > Telemetri > Telemetri Düzeyi'ne gidin ve \"off\" olarak ayarlayın. Değişikliği uygulamak için VS Code'u yeniden başlatın.",
+  "settings.aboutKiloCode.telemetry.openSettings": "Telemetri Ayarlarını Aç",
+
   "settings.agentBehaviour.subtab.modes": "Modlar",
   "settings.agentBehaviour.subtab.agents": "Ajanlar",
   "settings.agentBehaviour.subtab.mcpServers": "MCP Sunucuları",
@@ -1240,7 +1248,7 @@ export const dict = {
     "Paralel araç çağrıları ve alt ajanlar, ajanınızın aynı anda daha fazlasını yapmasını sağlar — böylece izlemek yerine daha fazla üretirsiniz.",
   "migration.whatsNew.features.interface.title": "Basitleştirilmiş Arayüz",
   "migration.whatsNew.features.interface.detail": "Daha az dikkat dağıtıcı, daha kolay ve hızlı okuma.",
-  "migration.whatsNew.features.agentManager.title": "Agent Manager",
+  "migration.whatsNew.features.agentManager.title": "Ajan Yöneticisi",
   "migration.whatsNew.features.agentManager.detail":
     "Birden fazla ajanı paralel olarak çalıştırmak için birleşik bir arayüz, her biri kendi worktree'sinde — ilerlemeyi izleyin, bağlam değiştirin ve değişiklikleri tek bir yerden inceleyin.",
   "migration.whatsNew.features.foundation.title": "Paylaşılan Temel",
@@ -1300,4 +1308,31 @@ export const dict = {
   "notifications.action.next": "Sonraki",
   "notifications.action.close": "Kapat",
   "notifications.action.tryModel": "Dene {{model}}",
+  // Missing translations - English fallbacks until translated
+  "profile.switchingAccount": "Hesap değiştiriliyor…",
+  "settings.agentBehaviour.createMode": "Yeni Mod Oluştur",
+  "settings.agentBehaviour.createMode.button": "Oluştur",
+  "settings.agentBehaviour.createMode.cancel": "İptal",
+  "settings.agentBehaviour.createMode.description": "Açıklama",
+  "settings.agentBehaviour.createMode.description.help": "Bu modun ne yaptığının kısa açıklaması.",
+  "settings.agentBehaviour.createMode.description.placeholder": "e.g. Reviews code for quality and best practices",
+  "settings.agentBehaviour.createMode.name": "Ad",
+  "settings.agentBehaviour.createMode.name.description":
+    "Mod için benzersiz tanımlayıcı. Yalnızca küçük harf, rakam ve tire kullanın.",
+  "settings.agentBehaviour.createMode.name.placeholder": "e.g. reviewer",
+  "settings.agentBehaviour.createMode.nameInvalid":
+    "Ad küçük harfle başlamalı ve yalnızca küçük harf, rakam ve tire içermelidir",
+  "settings.agentBehaviour.createMode.nameRequired": "Ad gereklidir",
+  "settings.agentBehaviour.createMode.nameTaken": "Bu adda bir mod zaten mevcut",
+  "settings.agentBehaviour.createMode.prompt": "Sistem İstemi",
+  "settings.agentBehaviour.createMode.prompt.help": "Bu modu kullanırken yapay zeka ajanı için talimatlar.",
+  "settings.agentBehaviour.createMode.prompt.placeholder":
+    "e.g. You are a code reviewer. Focus on code quality, best practices, and potential bugs.",
+  "settings.agentBehaviour.editMode": "Modu Düzenle",
+  "settings.agentBehaviour.editMode.back": "Listeye dön",
+  "settings.agentBehaviour.editMode.description": "Açıklama",
+  "settings.agentBehaviour.editMode.native": "Yerleşik mod (salt okunur tanım)",
+  "settings.agentBehaviour.editMode.prompt": "Sistem İstemi",
+  "settings.agentBehaviour.editMode.promptOverride": "Bu yerleşik mod için özel sistem istemi geçersiz kılma",
+  "settings.agentBehaviour.editMode.save": "Tamam",
 }

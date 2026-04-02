@@ -2340,7 +2340,9 @@ const AgentManagerContent: Component = () => {
                                   onCommitRename={() => commitRename(wt.id)}
                                   onCancelRename={cancelRename}
                                   onRemoveStale={() => confirmRemoveStaleWorktree(wt.id)}
-                                  onCopyPath={() => navigator.clipboard.writeText(wt.path)}
+                                  onCopyPath={() =>
+                                    vscode.postMessage({ type: "agentManager.copyToClipboard", text: wt.path })
+                                  }
                                   onOpen={() =>
                                     vscode.postMessage({ type: "agentManager.openWorktree", worktreeId: wt.id })
                                   }
@@ -2775,6 +2777,8 @@ const AgentManagerContent: Component = () => {
                 }}
                 readonly={readOnly()}
                 continueInWorktree={selection() === LOCAL}
+                promptBoxId={`agent-manager:${selection() ?? "unassigned"}`}
+                pendingSessionID={selection() === LOCAL ? activePendingId() : undefined}
               />
               <Show when={readOnly()}>
                 <div class="am-readonly-banner">

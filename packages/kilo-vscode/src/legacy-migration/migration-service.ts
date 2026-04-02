@@ -767,9 +767,18 @@ async function migrateLanguage(language: string): Promise<MigrationResultItem> {
 // ---------------------------------------------------------------------------
 
 function convertMcpServer(server: LegacyMcpServer): McpLocalConfig | McpRemoteConfig | null {
+  const enabled = server.disabled ? { enabled: false as const } : {}
+  // Legacy stores timeout in seconds, the new config expects milliseconds
+  const timeout = server.timeout !== undefined ? server.timeout * 1000 : undefined
   if (server.type === "sse" || server.type === "streamable-http") {
     if (!server.url) return null
-    return { type: "remote", url: server.url, headers: server.headers }
+    return {
+      type: "remote",
+      url: server.url,
+      headers: server.headers,
+      ...(timeout !== undefined && { timeout }),
+      ...enabled,
+    }
   }
   // Default: stdio
   if (!server.command) return null
@@ -778,7 +787,8 @@ function convertMcpServer(server: LegacyMcpServer): McpLocalConfig | McpRemoteCo
     type: "local",
     command,
     environment: server.env,
-    ...(server.timeout !== undefined && { timeout: server.timeout }),
+    ...(timeout !== undefined && { timeout }),
+    ...enabled,
   }
 }
 
@@ -1145,9 +1155,11 @@ function buildProviderList(
 
 function buildMcpServerList(settings: LegacyMcpSettings | null): MigrationMcpServerInfo[] {
   if (!settings?.mcpServers) return []
-  return Object.entries(settings.mcpServers)
-    .filter(([, server]) => !server.disabled)
-    .map(([name, server]) => ({ name, type: server.type ?? "stdio" }))
+  return Object.entries(settings.mcpServers).map(([name, server]) => ({
+    name,
+    type: server.type ?? "stdio",
+    disabled: server.disabled,
+  }))
 }
 
 /** @internal — exported for testing only */

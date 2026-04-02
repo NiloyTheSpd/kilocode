@@ -5805,6 +5805,9 @@
                     },
                     "id": {
                       "type": "string"
+                    },
+                    "skipped": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
@@ -5927,6 +5930,9 @@
                     },
                     "id": {
                       "type": "string"
+                    },
+                    "skipped": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
@@ -6106,6 +6112,9 @@
                     },
                     "id": {
                       "type": "string"
+                    },
+                    "skipped": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
@@ -6368,6 +6377,9 @@
                     },
                     "id": {
                       "type": "string"
+                    },
+                    "skipped": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
@@ -7511,6 +7523,198 @@
           {
             "lang": "js",
             "source": "import { createKiloClient } from \"@kilocode/sdk\n\nconst client = createKiloClient()\nawait client.kilo.cloud.session.import({\n  ...\n})"
+          }
+        ]
+      }
+    },
+    "/kilo/claw/status": {
+      "get": {
+        "operationId": "kilo.claw.status",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "directory",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "workspace",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "summary": "Get KiloClaw instance status",
+        "description": "Fetch the user's KiloClaw instance status via the KiloClaw worker",
+        "responses": {
+          "200": {
+            "description": "Instance status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "provisioned",
+                            "starting",
+                            "restarting",
+                            "running",
+                            "stopped",
+                            "destroying"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "sandboxId": {
+                      "type": "string"
+                    },
+                    "flyRegion": {
+                      "type": "string"
+                    },
+                    "machineSize": {
+                      "type": "object",
+                      "properties": {
+                        "cpus": {
+                          "type": "number"
+                        },
+                        "memory_mb": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "cpus",
+                        "memory_mb"
+                      ]
+                    },
+                    "openclawVersion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "lastStartedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "lastStoppedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "channelCount": {
+                      "type": "number"
+                    },
+                    "secretCount": {
+                      "type": "number"
+                    },
+                    "userId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "js",
+            "source": "import { createKiloClient } from \"@kilocode/sdk\n\nconst client = createKiloClient()\nawait client.kilo.claw.status({\n  ...\n})"
+          }
+        ]
+      }
+    },
+    "/kilo/claw/chat-credentials": {
+      "get": {
+        "operationId": "kilo.claw.chatCredentials",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "directory",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "workspace",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "summary": "Get KiloClaw chat credentials",
+        "description": "Fetch Stream Chat credentials for the user's KiloClaw instance",
+        "responses": {
+          "200": {
+            "description": "Stream Chat credentials or null",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "apiKey": {
+                          "type": "string"
+                        },
+                        "userId": {
+                          "type": "string"
+                        },
+                        "userToken": {
+                          "type": "string"
+                        },
+                        "channelId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "apiKey",
+                        "userId",
+                        "userToken",
+                        "channelId"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "js",
+            "source": "import { createKiloClient } from \"@kilocode/sdk\n\nconst client = createKiloClient()\nawait client.kilo.claw.chatCredentials({\n  ...\n})"
           }
         ]
       }
@@ -12487,7 +12691,31 @@
               "diffs": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/FileDiff"
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string"
+                    },
+                    "additions": {
+                      "type": "number"
+                    },
+                    "deletions": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "added",
+                        "deleted",
+                        "modified"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "file",
+                    "additions",
+                    "deletions"
+                  ]
                 }
               }
             },
@@ -13975,6 +14203,10 @@
             "description": "@deprecated Use 'share' field instead. Share newly created sessions automatically",
             "type": "boolean"
           },
+          "remote_control": {
+            "description": "Enable remote control of sessions via Kilo Cloud. Equivalent to running /remote on startup.",
+            "type": "boolean"
+          },
           "autoupdate": {
             "description": "Automatically update to the latest version. Set to true to auto-update, false to disable, or 'notify' to show update notifications",
             "anyOf": [
@@ -15061,7 +15293,31 @@
               "diffs": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/FileDiff"
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string"
+                    },
+                    "additions": {
+                      "type": "number"
+                    },
+                    "deletions": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "added",
+                        "deleted",
+                        "modified"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "file",
+                    "additions",
+                    "deletions"
+                  ]
                 }
               }
             },

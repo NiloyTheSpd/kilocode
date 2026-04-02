@@ -75,6 +75,7 @@ import {
   computeDefaultSelection,
   fetchProviderData,
   validateRecents,
+  validateFavorites,
   connectProvider as connectProviderAction,
   authorizeProviderOAuth as authorizeOAuthAction,
   completeProviderOAuth as completeOAuthAction,
@@ -144,6 +145,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
   private unsubscribeNotificationDismiss: (() => void) | null = null
   private unsubscribeLanguageChange: (() => void) | null = null
   private unsubscribeProfileChange: (() => void) | null = null
+  private unsubscribeFavoritesChange: (() => void) | null = null
   private unsubscribeMigrationComplete: (() => void) | null = null // legacy-migration
   private unsubscribeClearPendingPrompts: (() => void) | null = null
   private unsubscribeDirectoryProvider: (() => void) | null = null
@@ -474,6 +476,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
               z.object({
                 mime: z.string(),
                 url: z.string().refine((u) => u.startsWith("file://") || u.startsWith("data:")),
+                filename: z.string().optional(),
               }),
             )
             .optional()
@@ -483,6 +486,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
             message.text,
             typeof message.messageID === "string" ? message.messageID : undefined,
             message.sessionID,
+            typeof message.draftID === "string" ? message.draftID : undefined,
             message.providerID,
             message.modelID,
             message.agent,
@@ -497,6 +501,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
               z.object({
                 mime: z.string(),
                 url: z.string().refine((u) => u.startsWith("file://") || u.startsWith("data:")),
+                filename: z.string().optional(),
               }),
             )
             .optional()
@@ -507,6 +512,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
             message.arguments,
             typeof message.messageID === "string" ? message.messageID : undefined,
             message.sessionID,
+            typeof message.draftID === "string" ? message.draftID : undefined,
             message.providerID,
             message.modelID,
             message.agent,
@@ -585,6 +591,9 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
           break
         case "openSettingsPanel":
           vscode.commands.executeCommand("kilo-code.new.settingsButtonClicked", message.tab)
+          break
+        case "openVSCodeSettings":
+          vscode.commands.executeCommand("workbench.action.openSettings", message.query)
           break
         case "openMarketplacePanel":
           vscode.commands.executeCommand("kilo-code.new.marketplaceButtonClicked", this.projectDirectory)
@@ -850,6 +859,25 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
           this.postMessage({ type: "recentsLoaded", recents })
           break
         }
+        case "toggleFavorite": {
+          const current = validateFavorites(this.extensionContext?.globalState.get("favoriteModels"))
+          const key = `${message.providerID}/${message.modelID}`
+          const exists = current.some((f) => `${f.providerID}/${f.modelID}` === key)
+          const favorites =
+            message.action === "add" && !exists
+              ? [...current, { providerID: message.providerID, modelID: message.modelID }]
+              : message.action === "remove" && exists
+                ? current.filter((f) => `${f.providerID}/${f.modelID}` !== key)
+                : current
+          await this.extensionContext?.globalState.update("favoriteModels", favorites)
+          this.connectionService.notifyFavoritesChanged(favorites)
+          break
+        }
+        case "requestFavorites": {
+          const favorites = validateFavorites(this.extensionContext?.globalState.get("favoriteModels"))
+          this.postMessage({ type: "favoritesLoaded", favorites })
+          break
+        }
         // legacy-migration start
         case "requestLegacyMigrationData":
           void handleRequestLegacyMigrationData(this.migrationCtx)
@@ -965,6 +993,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
     this.unsubscribeNotificationDismiss?.()
     this.unsubscribeLanguageChange?.()
     this.unsubscribeProfileChange?.()
+    this.unsubscribeFavoritesChange?.()
     this.unsubscribeClearPendingPrompts?.()
     this.unsubscribeDirectoryProvider?.()
 
@@ -1040,6 +1069,11 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
       // Subscribe to profile change broadcast from other KiloProvider instances
       this.unsubscribeProfileChange = this.connectionService.onProfileChanged((data) => {
         this.postMessage({ type: "profileData", data })
+      })
+
+      // Subscribe to favorites change broadcast from other KiloProvider instances
+      this.unsubscribeFavoritesChange = this.connectionService.onFavoritesChanged((favorites) => {
+        this.postMessage({ type: "favoritesLoaded", favorites })
       })
 
       // legacy-migration start
@@ -1502,6 +1536,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
     }
     const method = typeof msg.method === "number" ? msg.method : 0
     const key = typeof msg.apiKey === "string" ? msg.apiKey : undefined
+    const keyChanged = msg.apiKeyChanged === true
     const code = typeof msg.code === "string" ? msg.code : undefined
     const config = msg.config && typeof msg.config === "object" ? (msg.config as Record<string, unknown>) : undefined
     if (msg.type === "connectProvider" && key) return connectProviderAction(ctx, rid, pid, key)
@@ -1509,7 +1544,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
     if (msg.type === "completeProviderOAuth") return completeOAuthAction(ctx, rid, pid, method, code)
     if (msg.type === "disconnectProvider") return disconnectProviderAction(ctx, rid, pid, this.cachedConfigMessage, set)
     if (msg.type === "saveCustomProvider" && config)
-      return saveCustomProviderAction(ctx, rid, pid, config, key, this.cachedConfigMessage, set)
+      return saveCustomProviderAction(ctx, rid, pid, config, key, keyChanged, this.cachedConfigMessage, set)
   }
 
   private async handleFetchCustomProviderModels(msg: Record<string, unknown>): Promise<void> {
@@ -2055,7 +2090,10 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
    * session ID and workspace directory, or undefined when the client is
    * disconnected.
    */
-  private async resolveSession(sessionID?: string): Promise<{ sid: string; dir: string } | undefined> {
+  private async resolveSession(
+    sessionID?: string,
+    draftID?: string,
+  ): Promise<{ sid: string; dir: string } | undefined> {
     if (!this.client) return undefined
 
     const dir = sessionID ? this.getWorkspaceDirectory(sessionID) : this.getContextDirectory()
@@ -2066,9 +2104,11 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
       this.contextSessionID = session.id
       this.trackDirectory(session.id, dir)
       this.trackedSessionIds.add(session.id)
+      if (draftID) this.contextSessionID = session.id
       this.postMessage({
         type: "sessionCreated",
         session: this.sessionToWebview(session),
+        draftID,
       })
     }
 
@@ -2082,6 +2122,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
     text: string,
     messageID?: string,
     sessionID?: string,
+    draftID?: string,
     providerID?: string,
     modelID?: string,
     agent?: string,
@@ -2094,6 +2135,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
         error: "Not connected to CLI backend",
         text,
         sessionID,
+        draftID,
         messageID,
         files,
       })
@@ -2102,7 +2144,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
 
     let resolved: { sid: string; dir: string } | undefined
     try {
-      resolved = await this.resolveSession(sessionID)
+      resolved = await this.resolveSession(sessionID, draftID)
 
       const parts: Array<TextPartInput | FilePartInput> = []
       if (files) {
@@ -2138,6 +2180,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
         error: getErrorMessage(error) || "Failed to send message",
         text,
         sessionID: resolved?.sid ?? sessionID,
+        draftID,
         messageID,
         files,
       })
@@ -2149,6 +2192,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
     args: string,
     messageID?: string,
     sessionID?: string,
+    draftID?: string,
     providerID?: string,
     modelID?: string,
     agent?: string,
@@ -2161,6 +2205,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
         error: "Not connected to CLI backend",
         text: `/${command} ${args}`.trim(),
         sessionID,
+        draftID,
         messageID,
         files,
       })
@@ -2169,7 +2214,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
 
     let resolved: { sid: string; dir: string } | undefined
     try {
-      resolved = await this.resolveSession(sessionID)
+      resolved = await this.resolveSession(sessionID, draftID)
 
       if (messageID) {
         this.connectionService.recordMessageSessionId(messageID, resolved!.sid)
@@ -2198,6 +2243,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
         error: getErrorMessage(error) || "Failed to send command",
         text: `/${command} ${args}`.trim(),
         sessionID: resolved?.sid ?? sessionID,
+        draftID,
         messageID,
         files,
       })
@@ -2919,6 +2965,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
     this.unsubscribeNotificationDismiss?.()
     this.unsubscribeLanguageChange?.()
     this.unsubscribeProfileChange?.()
+    this.unsubscribeFavoritesChange?.()
     this.unsubscribeMigrationComplete?.()
     this.unsubscribeClearPendingPrompts?.()
     this.unsubscribeDirectoryProvider?.()

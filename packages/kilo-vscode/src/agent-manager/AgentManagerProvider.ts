@@ -173,8 +173,16 @@ export class AgentManagerProvider implements Disposable {
       return
     }
 
-    await state.load()
+    const migration = await state.load()
     manager.cleanupOrphanedTempDirs()
+
+    // When the .kilocode → .kilo migration rewrote git worktree refs, nudge
+    // VS Code's git extension to re-discover them. Without this, worktrees
+    // won't appear in Source Control until the next VS Code restart.
+    if (migration.refsFixed > 0) {
+      this.log(`Migration fixed ${migration.refsFixed} git worktree ref(s), refreshing git`)
+      this.host.refreshGit()
+    }
 
     // Do not auto-remove stale worktrees on load.
     // Presence checks run in the shared poller and require explicit user cleanup.
@@ -223,6 +231,9 @@ export class AgentManagerProvider implements Disposable {
     if (m.type === "agentManager.addSessionToWorktree") return this.onAddSessionToWorktree(m.worktreeId)
     if (m.type === "agentManager.forkSession") return this.onForkSession(m.sessionId, m.worktreeId)
     if (m.type === "agentManager.closeSession") return this.onCloseSession(m.sessionId)
+    if ((m.type === "sendMessage" || m.type === "sendCommand") && m.draftID && !m.sessionID) {
+      this.activeSessionId = m.draftID
+    }
     if (m.type === "agentManager.configureSetupScript") {
       void this.configureSetupScript()
       return null
@@ -237,6 +248,10 @@ export class AgentManagerProvider implements Disposable {
     }
     if (m.type === "agentManager.openWorktree") {
       this.openWorktreeDirectory(m.worktreeId)
+      return null
+    }
+    if (m.type === "agentManager.copyToClipboard") {
+      this.host.copyToClipboard(m.text)
       return null
     }
     if (m.type === "previewImage") {

@@ -166,6 +166,9 @@ export const dict = {
   "model.tag.free": "Безкоштовно",
   "model.tag.latest": "Остання",
   "model.group.recommended": "Рекомендовані",
+  "model.group.favorites": "Обране",
+  "model.favorite.add": "Додати до обраного",
+  "model.favorite.remove": "Видалити з обраного",
   "model.provider.anthropic": "Anthropic",
   "model.provider.openai": "OpenAI",
   "model.provider.google": "Google",
@@ -994,6 +997,11 @@ export const dict = {
   "settings.aboutKiloCode.importSettings.success":
     "Налаштування імпортовано. Перегляньте зміни вище, потім натисніть Зберегти.",
 
+  "settings.aboutKiloCode.telemetry.title": "Телеметрія",
+  "settings.aboutKiloCode.telemetry.description":
+    'Телеметрія керується вбудованим налаштуванням телеметрії VS Code. Щоб вимкнути її, перейдіть до Налаштування > Телеметрія > Рівень телеметрії та встановіть значення "off". Перезапустіть VS Code, щоб застосувати зміну.',
+  "settings.aboutKiloCode.telemetry.openSettings": "Відкрити налаштування телеметрії",
+
   "settings.agentBehaviour.subtab.modes": "Режими",
   "settings.agentBehaviour.subtab.agents": "Агенти",
   "settings.agentBehaviour.subtab.mcpServers": "MCP-сервери",
@@ -1241,7 +1249,7 @@ export const dict = {
     "Паралельні виклики інструментів і підагенти дозволяють агенту робити більше одночасно — щоб ви більше створювали, а менше спостерігали.",
   "migration.whatsNew.features.interface.title": "Спрощений інтерфейс",
   "migration.whatsNew.features.interface.detail": "Менше відволікань, легше і швидше читати.",
-  "migration.whatsNew.features.agentManager.title": "Agent Manager",
+  "migration.whatsNew.features.agentManager.title": "Менеджер агентів",
   "migration.whatsNew.features.agentManager.detail":
     "Єдиний інтерфейс для запуску кількох агентів паралельно, кожен у власному робочому дереві — стежте за прогресом, перемикайте контекст і переглядайте зміни з одного місця.",
   "migration.whatsNew.features.foundation.title": "Спільна основа",
@@ -1301,4 +1309,32 @@ export const dict = {
   "notifications.action.next": "Далі",
   "notifications.action.close": "Закрити",
   "notifications.action.tryModel": "Спробувати {{model}}",
+  // Missing translations - English fallbacks until translated
+  "profile.switchingAccount": "Перемикання акаунту…",
+  "settings.agentBehaviour.createMode": "Створити новий режим",
+  "settings.agentBehaviour.createMode.button": "Створити",
+  "settings.agentBehaviour.createMode.cancel": "Скасувати",
+  "settings.agentBehaviour.createMode.description": "Опис",
+  "settings.agentBehaviour.createMode.description.help": "Короткий опис того, що робить цей режим.",
+  "settings.agentBehaviour.createMode.description.placeholder": "e.g. Reviews code for quality and best practices",
+  "settings.agentBehaviour.createMode.name": "Назва",
+  "settings.agentBehaviour.createMode.name.description":
+    "Унікальний ідентифікатор режиму. Використовуйте лише малі літери, цифри та дефіси.",
+  "settings.agentBehaviour.createMode.name.placeholder": "e.g. reviewer",
+  "settings.agentBehaviour.createMode.nameInvalid":
+    "Назва повинна починатися з малої літери і містити лише малі літери, цифри та дефіси",
+  "settings.agentBehaviour.createMode.nameRequired": "Назва обов'язкова",
+  "settings.agentBehaviour.createMode.nameTaken": "Режим з такою назвою вже існує",
+  "settings.agentBehaviour.createMode.prompt": "Системний запит",
+  "settings.agentBehaviour.createMode.prompt.help": "Інструкції для агента ШІ при використанні цього режиму.",
+  "settings.agentBehaviour.createMode.prompt.placeholder":
+    "e.g. You are a code reviewer. Focus on code quality, best practices, and potential bugs.",
+  "settings.agentBehaviour.editMode": "Редагувати режим",
+  "settings.agentBehaviour.editMode.back": "Назад до списку",
+  "settings.agentBehaviour.editMode.description": "Опис",
+  "settings.agentBehaviour.editMode.native": "Вбудований режим (визначення лише для читання)",
+  "settings.agentBehaviour.editMode.prompt": "Системний запит",
+  "settings.agentBehaviour.editMode.promptOverride":
+    "Власне перевизначення системного запиту для цього вбудованого режиму",
+  "settings.agentBehaviour.editMode.save": "Готово",
 }
