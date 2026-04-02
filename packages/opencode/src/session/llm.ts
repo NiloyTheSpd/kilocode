@@ -28,6 +28,7 @@ import { Telemetry } from "@kilocode/kilo-telemetry" // kilocode_change
 import { getKiloProjectId } from "@/kilocode/project-id"
 import { HEADER_PROJECTID, HEADER_MACHINEID, HEADER_TASKID } from "@kilocode/kilo-gateway"
 import { Identity } from "@kilocode/kilo-telemetry"
+import { KiloMdResolver } from "@/kilocode/KiloMdResolver"
 // kilocode_change end
 
 export namespace LLM {
@@ -71,22 +72,28 @@ export namespace LLM {
     ])
     const isCodex = provider.id === "openai" && auth?.type === "oauth"
 
+    // kilocode_change start - KILO.md multi-tier context injection
+    const kiloMd = await KiloMdResolver.resolve(Instance.directory)
+    // kilocode_change end
+
     const system = []
     system.push(
-      [
-        // kilocode_change start - soul defines core identity and personality
-        ...(isCodex ? [] : [SystemPrompt.soul()]),
-        // kilocode_change end
-        // use agent prompt otherwise provider prompt
-        // For Codex sessions, skip SystemPrompt.provider() since it's sent via options.instructions
-        ...(input.agent.prompt ? [input.agent.prompt] : isCodex ? [] : SystemPrompt.provider(input.model)),
-        // any custom prompt passed into this call
-        ...input.system,
-        // any custom prompt from last user message
-        ...(input.user.system ? [input.user.system] : []),
-      ]
-        .filter((x) => x)
-        .join("\n"),
+      KiloMdResolver.inject(kiloMd,
+        [
+          // kilocode_change start - soul defines core identity and personality
+          ...(isCodex ? [] : [SystemPrompt.soul()]),
+          // kilocode_change end
+          // use agent prompt otherwise provider prompt
+          // For Codex sessions, skip SystemPrompt.provider() since it's sent via options.instructions
+          ...(input.agent.prompt ? [input.agent.prompt] : isCodex ? [] : SystemPrompt.provider(input.model)),
+          // any custom prompt passed into this call
+          ...input.system,
+          // any custom prompt from last user message
+          ...(input.user.system ? [input.user.system] : []),
+        ]
+          .filter((x) => x)
+          .join("\n"),
+      )
     )
 
     const header = system[0]
