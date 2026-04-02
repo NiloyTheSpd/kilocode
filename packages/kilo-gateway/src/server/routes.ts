@@ -536,7 +536,6 @@ export function createKiloRoutes(deps: KiloRoutesDeps) {
           const token = auth.type === "api" ? auth.key : auth.type === "oauth" ? auth.access : undefined
           if (!token) return c.json({ error: "No valid token found" }, 401)
 
-          // kilocode_change start - pass org context for org-scoped instances
           const organizationId = auth.type === "oauth" ? auth.accountId : undefined
           const headers: Record<string, string> = {
             Authorization: `Bearer ${token}`,
@@ -545,7 +544,6 @@ export function createKiloRoutes(deps: KiloRoutesDeps) {
           if (organizationId) {
             headers[HEADER_ORGANIZATIONID] = organizationId
           }
-          // kilocode_change end
 
           const response = await fetch(`${KILO_API_BASE}/api/kiloclaw/status`, { headers })
 
@@ -595,7 +593,6 @@ export function createKiloRoutes(deps: KiloRoutesDeps) {
           const token = auth.type === "api" ? auth.key : auth.type === "oauth" ? auth.access : undefined
           if (!token) return c.json({ error: "No valid token found" }, 401)
 
-          // kilocode_change start - pass org context for org-scoped instances
           const organizationId = auth.type === "oauth" ? auth.accountId : undefined
           const headers: Record<string, string> = {
             Authorization: `Bearer ${token}`,
@@ -604,7 +601,6 @@ export function createKiloRoutes(deps: KiloRoutesDeps) {
           if (organizationId) {
             headers[HEADER_ORGANIZATIONID] = organizationId
           }
-          // kilocode_change end
 
           const response = await fetch(`${KILO_API_BASE}/api/kiloclaw/chat-credentials`, { headers })
 
