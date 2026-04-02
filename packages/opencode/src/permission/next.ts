@@ -8,8 +8,12 @@ import { PermissionTable } from "@/session/session.sql"
 import { fn } from "@/util/fn"
 import { Log } from "@/util/log"
 import { Wildcard } from "@/util/wildcard"
+import { Flag } from "@/flag/flag" // kilocode_change
 import { drainCovered } from "@/kilocode/permission/drain" // kilocode_change
 import { ConfigProtection } from "@/kilocode/permission/config-paths" // kilocode_change
+import { PermissionMode } from "@/kilocode/permission/PermissionMode" // kilocode_change
+import { AutoPermissionClassifier } from "@/kilocode/permission/AutoPermissionClassifier" // kilocode_change
+import { TrustGate } from "@/kilocode/permission/TrustGate" // kilocode_change
 import os from "os"
 import z from "zod"
 
@@ -191,6 +195,42 @@ export namespace PermissionNext {
       const { ruleset, ...request } = input
       // kilocode_change start — force "ask" for config file edits
       const protected_ = ConfigProtection.isRequest(request)
+      // kilocode_change end
+
+      // kilocode_change start - auto permission classifier
+      const mode = PermissionMode.resolve((await Config.get()).permission?.mode as string | undefined, Flag.KILO_PERMISSION_MODE)
+
+      if (mode === "auto") {
+        const decision = await AutoPermissionClassifier.classify({
+          tool: request.permission,
+          input: request.metadata,
+          pattern: request.patterns[0] ?? "*",
+        })
+
+        if (decision.confidence >= 0.9) {
+          if (decision.action === "allow") {
+            log.info("auto allowed permission", { tool: request.permission, confidence: decision.confidence })
+            return
+          }
+          if (decision.action === "deny") {
+            throw new DeniedError([])
+          }
+        }
+      }
+
+      if (mode === "allow_edits") {
+        // Auto-allow edit tools in CWD
+        if (["edit", "write", "patch", "multiedit"].includes(request.permission)) {
+          log.info("auto allowed edit permission", { tool: request.permission })
+          return
+        }
+      }
+
+      if (mode === "bypass") {
+        // Bypass all permission checks
+        log.warn("permission bypass enabled", { tool: request.permission })
+        return
+      }
       // kilocode_change end
       for (const pattern of request.patterns ?? []) {
         const rule = evaluate(request.permission, pattern, ruleset, s.approved)

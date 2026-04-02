@@ -67,6 +67,7 @@ export namespace Flag {
   }
 
   export const KILO_SESSION_RETRY_LIMIT = number("KILO_SESSION_RETRY_LIMIT")
+  export const KILO_PERMISSION_MODE = process.env["KILO_PERMISSION_MODE"]
 }
 
 // Dynamic getter for KILO_DISABLE_PROJECT_CONFIG
