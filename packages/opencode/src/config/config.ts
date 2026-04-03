@@ -432,6 +432,13 @@ export namespace Config {
             for (const file of ["kilo.jsonc", "kilo.json", "opencode.jsonc", "opencode.json"]) {
               project = mergeConfigConcatArrays(project, await loadFile(path.join(dir, file)))
             }
+            // kilocode_change start - load project-scoped mcp.json
+            const { McpConfig } = await import("@/mcp/McpConfig")
+            const dirMcp = await McpConfig.load(dir)
+            if (Object.keys(dirMcp).length > 0) {
+              project.mcp = mergeDeep(project.mcp ?? {}, dirMcp)
+            }
+            // kilocode_change end
           }
           project.command = mergeDeep(project.command ?? {}, await loadCommand(dir))
           project.agent = mergeDeep(project.agent ?? {}, await loadAgent(dir))
