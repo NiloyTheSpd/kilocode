@@ -8,6 +8,7 @@ import { Flag } from "@/flag/flag"
 import { Log } from "../util/log"
 import { Glob } from "../util/glob"
 import type { MessageV2 } from "./message-v2"
+import { KiloMdResolver } from "../context/KiloMdResolver"
 
 const log = Log.create({ service: "instruction" })
 
@@ -136,7 +137,15 @@ export namespace InstructionPrompt {
         .then((x) => (x ? "Instructions from: " + url + "\n" + x : "")),
     )
 
-    return Promise.all([...files, ...fetches]).then((result) => result.filter(Boolean))
+    const kilomd = await KiloMdResolver.system()
+
+    return Promise.all([...files, ...fetches]).then((result) => {
+      const filtered = result.filter(Boolean)
+      if (kilomd) {
+        filtered.push(kilomd)
+      }
+      return filtered
+    })
   }
 
   export function loaded(messages: MessageV2.WithParts[]) {

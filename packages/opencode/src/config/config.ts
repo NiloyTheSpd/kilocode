@@ -371,13 +371,91 @@ export namespace Config {
     directory: string
     layers?: Layer[]
   }): Promise<Info> {
-    // Default layer order: policy -> flag -> local -> project -> user
     const layers = opts.layers ?? ["policy", "flag", "local", "project", "user"]
-    
     let result: Info = {}
-    const state = await stateInit()
-    result = state.config
-    
+
+    const layerMap: Record<Layer, () => Promise<Info>> = {
+      policy: async () => {
+        if (existsSync(managedDir)) {
+          let policy: Info = {}
+          for (const file of ["kilo.jsonc", "kilo.json", "opencode.jsonc", "opencode.json"]) {
+            policy = mergeConfigConcatArrays(policy, await loadFile(path.join(managedDir, file)))
+          }
+          return policy
+        }
+        return {}
+      },
+      flag: async () => {
+        const flagResult: Info = {}
+        if (Flag.KILO_PERMISSION) {
+          flagResult.permission = mergeDeep(flagResult.permission ?? {}, JSON.parse(Flag.KILO_PERMISSION))
+        }
+        if (Flag.KILO_DISABLE_AUTOCOMPACT) {
+          flagResult.compaction = { ...flagResult.compaction, auto: false }
+        }
+        if (Flag.KILO_DISABLE_PRUNE) {
+          flagResult.compaction = { ...flagResult.compaction, prune: false }
+        }
+        return flagResult
+      },
+      local: async () => {
+        let local: Info = {}
+        if (Flag.KILO_CONFIG) {
+          local = mergeConfigConcatArrays(local, await loadFile(Flag.KILO_CONFIG))
+        }
+        if (process.env.KILO_CONFIG_CONTENT) {
+          local = mergeConfigConcatArrays(
+            local,
+            await load(process.env.KILO_CONFIG_CONTENT, {
+              dir: opts.directory,
+              source: "KILO_CONFIG_CONTENT",
+            }),
+          )
+        }
+        return local
+      },
+      project: async () => {
+        let project: Info = {}
+        if (!Flag.KILO_DISABLE_PROJECT_CONFIG) {
+          for (const file of ["kilo.jsonc", "kilo.json", "opencode.jsonc", "opencode.json"]) {
+            project = mergeConfigConcatArrays(project, await loadFile(file))
+          }
+        }
+        const directories = await ConfigPaths.directories(opts.directory, Instance.worktree)
+        for (const dir of unique(directories)) {
+          if (
+            dir.endsWith(".kilo") ||
+            dir.endsWith(".kilocode") ||
+            dir.endsWith(".opencode") ||
+            dir === Flag.KILO_CONFIG_DIR
+          ) {
+            for (const file of ["kilo.jsonc", "kilo.json", "opencode.jsonc", "opencode.json"]) {
+              project = mergeConfigConcatArrays(project, await loadFile(path.join(dir, file)))
+            }
+          }
+          project.command = mergeDeep(project.command ?? {}, await loadCommand(dir))
+          project.agent = mergeDeep(project.agent ?? {}, await loadAgent(dir))
+          project.agent = mergeDeep(project.agent, await loadMode(dir))
+          project.plugin = [...(project.plugin ?? []), ...(await loadPlugin(dir))]
+        }
+        return project
+      },
+      user: async () => {
+        return await global()
+      },
+    }
+
+    for (const layer of layers) {
+      const loader = layerMap[layer]
+      if (loader) {
+        const layerConfig = await loader()
+        result = mergeConfigConcatArrays(result, layerConfig)
+      }
+    }
+
+    result.plugin = deduplicatePlugins(result.plugin ?? [])
+    if (!result.username) result.username = os.userInfo().username
+
     return result
   }
 
