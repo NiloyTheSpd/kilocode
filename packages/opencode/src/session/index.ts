@@ -234,7 +234,7 @@ export namespace Session {
       "session.turn.close",
       z.object({
         sessionID: z.string(),
-        reason: z.enum(["completed", "error", "interrupted"]),
+        reason: z.enum(["completed", "error", "interrupted", "max_turns"]),
       }),
     ),
     // kilocode_change end

@@ -322,13 +322,43 @@ export const RunCommand = cmd({
           describe: "permission mode: bypass, allow_edits, or auto (overrides config)",
           choices: ["bypass", "allow_edits", "auto"] as const,
         })
+        .option("max-turns", {
+          type: "number",
+          describe: "maximum number of autonomous agent loop iterations",
+        })
+        .option("allowed-tools", {
+          type: "string",
+          describe: "comma-separated list of tools allowed (e.g., Edit,Bash,Read)",
+        })
+        .option("output-format", {
+          type: "string",
+          describe: "output format: text, json, or stream-json (for CI pipelines)",
+          choices: ["text", "json", "stream-json"] as const,
+        })
+        .option("bare", {
+          type: "boolean",
+          describe: "skip hooks, LSP, and plugin walks for ultra-fast headless mode",
+          default: false,
+        })
       // kilocode_change end
     )
   },
   handler: async (args) => {
-    // kilocode_change start - set permission mode env var for server to pick up
+    // kilocode_change start - set env vars for server to pick up
     if (args["permission-mode"]) {
       process.env["KILO_PERMISSION_MODE"] = args["permission-mode"]
+    }
+    if (args["max-turns"]) {
+      process.env["KILO_MAX_TURNS"] = String(args["max-turns"])
+    }
+    if (args["allowed-tools"]) {
+      process.env["KILO_ALLOWED_TOOLS"] = args["allowed-tools"]
+    }
+    if (args["output-format"]) {
+      process.env["KILO_OUTPUT_FORMAT"] = args["output-format"]
+    }
+    if (args["bare"]) {
+      process.env["KILO_BARE"] = "1"
     }
     // kilocode_change end
 

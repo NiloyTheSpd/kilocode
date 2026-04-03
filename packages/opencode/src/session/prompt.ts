@@ -331,8 +331,14 @@ export namespace SessionPrompt {
     let envUser: string | undefined
 
     let step = 0
+    const maxTurns = Flag.KILO_MAX_TURNS
     const session = await Session.get(sessionID)
     while (true) {
+      if (maxTurns && step >= maxTurns) {
+        log.info("max turns reached", { step, maxTurns, sessionID })
+        closeReason = "max_turns"
+        break
+      }
       SessionStatus.set(sessionID, { type: "busy" })
       log.info("loop", { step, sessionID })
       // kilocode_change start
@@ -875,6 +881,11 @@ export namespace SessionPrompt {
       { modelID: input.model.api.id, providerID: input.model.providerID },
       input.agent,
     )) {
+      // kilocode_change start - filter tools by allowed-tools list
+      if (Flag.KILO_ALLOWED_TOOLS && !Flag.KILO_ALLOWED_TOOLS.includes(item.id)) {
+        continue
+      }
+      // kilocode_change end
       const schema = ProviderTransform.schema(input.model, z.toJSONSchema(item.parameters))
       tools[item.id] = tool({
         id: item.id as any,

@@ -117,6 +117,9 @@ export namespace Plugin {
     Output = Parameters<Required<Hooks>[Name]>[1],
   >(name: Name, input: Input, output: Output): Promise<Output> {
     if (!name) return output
+    // kilocode_change - skip all plugin triggers in bare mode
+    if (Flag.KILO_BARE) return output
+    // kilocode_change end
     for (const hook of await state().then((x) => x.hooks)) {
       const fn = hook[name]
       if (!fn) continue
