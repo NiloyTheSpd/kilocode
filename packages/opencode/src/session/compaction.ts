@@ -14,6 +14,7 @@ import { Agent } from "@/agent/agent"
 import { Plugin } from "@/plugin"
 import { Config } from "@/config/config"
 import { ProviderTransform } from "@/provider/transform"
+import { HookRunner } from "@/hook/HookRunner"
 
 export namespace SessionCompaction {
   const log = Log.create({ service: "session.compaction" })
@@ -29,11 +30,11 @@ export namespace SessionCompaction {
 
   const COMPACTION_BUFFER = 20_000
 
-  export async function isOverflow(input: { tokens: MessageV2.Assistant["tokens"]; model: Provider.Model }) {
+  export async function isOverflow(input: { tokens: MessageV2.Assistant["tokens"]; model: Provider.Model }): Promise<{ overflow: boolean; mode: "full" | "micro" }> {
     const config = await Config.get()
-    if (config.compaction?.auto === false) return false
+    if (config.compaction?.auto === false) return { overflow: false, mode: "full" }
     const context = input.model.limit.context
-    if (context === 0) return false
+    if (context === 0) return { overflow: false, mode: "full" }
 
     const count =
       input.tokens.total ||
@@ -44,7 +45,17 @@ export namespace SessionCompaction {
     const usable = input.model.limit.input
       ? input.model.limit.input - reserved
       : context - ProviderTransform.maxOutputTokens(input.model)
-    return count >= usable
+
+    const usageRatio = count / usable
+
+    if (config.compaction?.reactive_threshold) {
+      if (usageRatio >= config.compaction.reactive_threshold) {
+        return { overflow: true, mode: "micro" }
+      }
+    }
+
+    const mode = count >= usable * 0.8 ? "micro" : "full"
+    return { overflow: count >= usable, mode }
   }
 
   export const PRUNE_MINIMUM = 20_000
@@ -105,6 +116,7 @@ export namespace SessionCompaction {
     abort: AbortSignal
     auto: boolean
     overflow?: boolean
+    mode?: "full" | "micro"
   }) {
     const userMessage = input.messages.findLast((m) => m.info.id === input.parentID)!.info as MessageV2.User
 
@@ -170,7 +182,9 @@ export namespace SessionCompaction {
       { sessionID: input.sessionID },
       { context: [], prompt: undefined },
     )
-    const defaultPrompt = `Provide a detailed prompt for continuing our conversation above.
+    const defaultPrompt = input.mode === "micro"
+      ? `Summarize the tool outputs and current file state in 2-3 sentences for continuing the conversation. Focus on what files were changed and current task status.`
+      : `Provide a detailed prompt for continuing our conversation above.
 Focus on information that would be helpful for continuing the conversation, including what we did, what we're doing, which files we're working on, and what we're going to do next.
 The summary that you construct will be used so that another agent can read it and continue the work.
 
@@ -290,6 +304,10 @@ When constructing the summary, try to stick to this template:
     }
     if (processor.message.error) return "stop"
     Bus.publish(Event.Compacted, { sessionID: input.sessionID })
+    void HookRunner.fire(HookRunner.Event.CompactionEnd, {
+      sessionID: input.sessionID,
+      mode: input.mode ?? "full",
+    })
     return "continue"
   }
 
@@ -303,6 +321,7 @@ When constructing the summary, try to stick to this template:
       }),
       auto: z.boolean(),
       overflow: z.boolean().optional(),
+      mode: z.enum(["full", "micro"]).optional(),
     }),
     async (input) => {
       const msg = await Session.updateMessage({
@@ -322,6 +341,7 @@ When constructing the summary, try to stick to this template:
         type: "compaction",
         auto: input.auto,
         overflow: input.overflow,
+        mode: input.mode,
       })
     },
   )

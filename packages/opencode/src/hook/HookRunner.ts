@@ -16,21 +16,55 @@ export namespace HookRunner {
     ToolError: "tool.error",
     Error: "error",
     CompactionEnd: "compaction.end",
+    LoopIteration: "loop.iteration",
+    ModelRequest: "model.request",
+    ModelResponse: "model.response",
+    SubagentSpawn: "subagent.spawn",
+    SubagentComplete: "subagent.complete",
+    ContextThreshold: "context.threshold",
+    FileChange: "file.change",
+    ConfigChange: "config.change",
+    SessionResume: "session.resume",
+    SessionFork: "session.fork",
+    PermissionDenied: "permission.denied",
   }
 
   type HookConfig = NonNullable<NonNullable<Config.Info["hook"]>[string]>
 
-  export async function fire(name: string, payload: Record<string, unknown>): Promise<void> {
-    if (Flag.KILO_BARE) return
+  export async function fire(name: string, payload: Record<string, unknown>): Promise<{ asyncRewake?: boolean }> {
+    if (Flag.KILO_BARE) return {}
 
     const config = await Config.get()
-    const hookConfig = config.hook?.[name]
-    if (!hookConfig) return
+    let hookConfig = config.hook?.[name]
+    if (!hookConfig) {
+      hookConfig = config.hook?.["*"]
+      if (!hookConfig) return {}
+    }
 
-    await Promise.allSettled([
+    const result = await Promise.allSettled([
       fireCommand(hookConfig, name, payload),
       fireHttp(hookConfig, name, payload),
     ])
+
+    const commandResult = result[0]
+    if (hookConfig.async_rewake && commandResult.status === "fulfilled") {
+      const code = await Process.spawn(["sh", "-c", hookConfig.command!], {
+        env: {
+          ...process.env,
+          ...hookConfig.env,
+          KILO_HOOK_EVENT: name,
+          KILO_HOOK_PAYLOAD: JSON.stringify(payload),
+        },
+        stdout: "pipe",
+        stderr: "pipe",
+        timeout: hookConfig.timeout ?? 5000,
+      }).exited
+      if (code === 2) {
+        return { asyncRewake: true }
+      }
+    }
+
+    return {}
   }
 
   async function fireCommand(hook: HookConfig, name: string, payload: Record<string, unknown>): Promise<void> {
@@ -70,9 +104,14 @@ export namespace HookRunner {
     const timeout = hook.timeout ?? 5000
 
     try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...(hook.headers ?? {}),
+      }
+
       const response = await fetch(hook.url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ event: name, payload }),
         signal: AbortSignal.timeout(timeout),
       })

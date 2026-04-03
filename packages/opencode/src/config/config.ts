@@ -1399,6 +1399,12 @@ export namespace Config {
         timeout: z.number().optional().describe("Timeout in milliseconds (default 5000)"),
         continue_on_error: z.boolean().optional().describe("Continue agent loop if hook fails"),
         env: z.record(z.string(), z.string()).optional().describe("Additional environment variables"),
+        headers: z.record(z.string(), z.string()).optional().describe("Custom HTTP headers"),
+        retry: z.number().optional().describe("Number of retries on failure"),
+        events: z.array(z.string()).optional().describe("Events to listen to (multi-event hooks)"),
+        async: z.boolean().optional().describe("Run hook in background"),
+        async_rewake: z.boolean().optional().describe("Wake model on hook error (exit code 2)"),
+        if: z.string().optional().describe("Conditional pattern (e.g., 'Bash(git *)')"),
       })).optional().describe("Lifecycle hook configuration"),
       layout: Layout.optional().describe("@deprecated Always uses stretch layout."),
       permission: Permission.optional(),
@@ -1406,6 +1412,14 @@ export namespace Config {
       enterprise: z
         .object({
           url: z.string().optional().describe("Enterprise URL"),
+          managed_config: z.boolean().optional().describe("Enable managed configuration (MDM)"),
+          sso_provider: z.string().optional().describe("SSO provider (okta, azure, google, etc)"),
+          policy_enforcement: z.enum(["strict", "advisory", "disabled"]).optional().describe("Policy enforcement level"),
+          audit_log: z.boolean().optional().describe("Enable audit logging"),
+          rate_limit: z.object({
+            requests_per_minute: z.number().optional().describe("Max API requests per minute"),
+            tokens_per_hour: z.number().optional().describe("Max tokens per hour"),
+          }).optional(),
         })
         .optional(),
       compaction: z
@@ -1418,6 +1432,8 @@ export namespace Config {
             .min(0)
             .optional()
             .describe("Token buffer for compaction. Leaves enough window to avoid overflow during compaction."),
+          mode: z.enum(["full", "micro", "reactive"]).optional().describe("Compaction mode: full (default), micro (lightweight), or reactive (preemptive)"),
+          reactive_threshold: z.number().min(0).max(1).optional().describe("Trigger compaction when context usage exceeds this ratio (0-1)"),
         })
         .optional(),
       experimental: z

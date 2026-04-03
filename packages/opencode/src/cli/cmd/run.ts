@@ -340,6 +340,20 @@ export const RunCommand = cmd({
           describe: "skip hooks, LSP, and plugin walks for ultra-fast headless mode",
           default: false,
         })
+        .option("coordinator", {
+          type: "boolean",
+          describe: "enable coordinator mode for multi-session parallel execution",
+          default: false,
+        })
+        .option("channels", {
+          type: "string",
+          describe: "comma-separated channels for permission relay (telegram,discord,slack)",
+        })
+        .option("fork-subagent", {
+          type: "boolean",
+          describe: "fork subagent sessions to inherit full parent context",
+          default: false,
+        })
       // kilocode_change end
     )
   },
@@ -359,6 +373,15 @@ export const RunCommand = cmd({
     }
     if (args["bare"]) {
       process.env["KILO_BARE"] = "1"
+    }
+    if (args["coordinator"]) {
+      process.env["KILO_COORDINATOR"] = "1"
+    }
+    if (args["channels"]) {
+      process.env["KILO_CHANNELS"] = args["channels"]
+    }
+    if (args["fork-subagent"]) {
+      process.env["KILO_FORK_SUBAGENT"] = "1"
     }
     // kilocode_change end
 

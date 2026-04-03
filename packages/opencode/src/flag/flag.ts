@@ -118,3 +118,6 @@ Object.defineProperty(Flag, "KILO_CLIENT", {
   enumerable: true,
   configurable: false,
 })
+
+export const KILO_FORK_SUBAGENT = process.env["KILO_FORK_SUBAGENT"] === "1"
+export const KILO_COORDINATOR = process.env["KILO_COORDINATOR"] === "1"

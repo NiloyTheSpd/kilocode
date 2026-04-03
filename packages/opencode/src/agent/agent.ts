@@ -34,7 +34,7 @@ export namespace Agent {
       name: z.string(),
       displayName: z.string().optional(), // kilocode_change - human-readable name for org modes
       description: z.string().optional(),
-      mode: z.enum(["subagent", "primary", "all"]),
+      mode: z.enum(["subagent", "primary", "all", "coordinator"]),
       native: z.boolean().optional(),
       hidden: z.boolean().optional(),
       deprecated: z.boolean().optional(),
@@ -351,6 +351,37 @@ export namespace Agent {
         mode: "subagent",
         native: true,
       },
+      // kilocode_change start - coordinator agent for multi-session orchestration
+      coordinator: {
+        name: "coordinator",
+        displayName: "Coordinator",
+        description: "Multi-session coordinator that manages parallel subagent execution with real-time status tracking and 4-phase workflow.",
+        permission: PermissionNext.merge(
+          defaults,
+          PermissionNext.fromConfig({
+            "*": "deny",
+            read: "allow",
+            grep: "allow",
+            glob: "allow",
+            list: "allow",
+            question: "allow",
+            task: "allow",
+            todoread: "allow",
+            todowrite: "allow",
+            webfetch: "allow",
+            websearch: "allow",
+            codesearch: "allow",
+            codebase_search: "allow",
+          }),
+          user,
+          PermissionNext.fromConfig({ bash: "deny" }),
+        ),
+        options: {},
+        mode: "coordinator",
+        native: true,
+        steps: 50,
+      },
+      // kilocode_change end
       explore: {
         name: "explore",
         permission: PermissionNext.merge(

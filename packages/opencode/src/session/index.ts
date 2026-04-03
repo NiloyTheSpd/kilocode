@@ -68,6 +68,7 @@ export namespace Session {
       workspaceID: row.workspace_id ?? undefined,
       directory: row.directory,
       parentID: row.parent_id ?? undefined,
+      forkFromID: row.fork_from_id ?? undefined,
       title: row.title,
       version: row.version,
       summary,
@@ -89,6 +90,7 @@ export namespace Session {
       project_id: info.projectID,
       workspace_id: info.workspaceID,
       parent_id: info.parentID,
+      fork_from_id: info.forkFromID,
       slug: info.slug,
       directory: info.directory,
       title: info.title,
@@ -125,6 +127,7 @@ export namespace Session {
       workspaceID: z.string().optional(),
       directory: z.string(),
       parentID: Identifier.schema("session").optional(),
+      forkFromID: Identifier.schema("session").optional(),
       summary: z
         .object({
           additions: z.number(),

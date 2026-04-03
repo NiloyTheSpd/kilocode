@@ -134,6 +134,7 @@ export namespace SessionPrompt {
         shell: z.string().optional(),
       })
       .optional(),
+    fork: z.boolean().optional().describe("Reuse parent session's rendered system prompt for cache sharing"),
     // kilocode_change end
     parts: z.array(
       z.discriminatedUnion("type", [
@@ -386,6 +387,7 @@ export namespace SessionPrompt {
       }
 
       step++
+      void HookRunner.fire(HookRunner.Event.LoopIteration, { sessionID, step })
       if (step === 1)
         ensureTitle({
           session,
@@ -604,16 +606,19 @@ export namespace SessionPrompt {
       // context overflow, needs compaction
       if (
         lastFinished &&
-        lastFinished.summary !== true &&
-        (await SessionCompaction.isOverflow({ tokens: lastFinished.tokens, model }))
+        lastFinished.summary !== true
       ) {
-        await SessionCompaction.create({
-          sessionID,
-          agent: lastUser.agent,
-          model: lastUser.model,
-          auto: true,
-        })
-        continue
+        const { overflow, mode } = await SessionCompaction.isOverflow({ tokens: lastFinished.tokens, model })
+        if (overflow) {
+          await SessionCompaction.create({
+            sessionID,
+            agent: lastUser.agent,
+            model: lastUser.model,
+            auto: true,
+            mode,
+          })
+          continue
+        }
       }
 
       // normal processing

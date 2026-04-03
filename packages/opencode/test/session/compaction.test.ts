@@ -48,7 +48,7 @@ describe("session.compaction.isOverflow", () => {
       fn: async () => {
         const model = createModel({ context: 100_000, output: 32_000 })
         const tokens = { input: 75_000, output: 5_000, reasoning: 0, cache: { read: 0, write: 0 } }
-        expect(await SessionCompaction.isOverflow({ tokens, model })).toBe(true)
+        expect((await SessionCompaction.isOverflow({ tokens, model })).overflow).toBe(true)
       },
     })
   })
@@ -60,7 +60,7 @@ describe("session.compaction.isOverflow", () => {
       fn: async () => {
         const model = createModel({ context: 200_000, output: 32_000 })
         const tokens = { input: 100_000, output: 10_000, reasoning: 0, cache: { read: 0, write: 0 } }
-        expect(await SessionCompaction.isOverflow({ tokens, model })).toBe(false)
+        expect((await SessionCompaction.isOverflow({ tokens, model })).overflow).toBe(false)
       },
     })
   })
@@ -72,7 +72,7 @@ describe("session.compaction.isOverflow", () => {
       fn: async () => {
         const model = createModel({ context: 100_000, output: 32_000 })
         const tokens = { input: 60_000, output: 10_000, reasoning: 0, cache: { read: 10_000, write: 0 } }
-        expect(await SessionCompaction.isOverflow({ tokens, model })).toBe(true)
+        expect((await SessionCompaction.isOverflow({ tokens, model })).overflow).toBe(true)
       },
     })
   })
@@ -84,7 +84,7 @@ describe("session.compaction.isOverflow", () => {
       fn: async () => {
         const model = createModel({ context: 400_000, input: 272_000, output: 128_000 })
         const tokens = { input: 271_000, output: 1_000, reasoning: 0, cache: { read: 2_000, write: 0 } }
-        expect(await SessionCompaction.isOverflow({ tokens, model })).toBe(true)
+        expect((await SessionCompaction.isOverflow({ tokens, model })).overflow).toBe(true)
       },
     })
   })
@@ -96,7 +96,7 @@ describe("session.compaction.isOverflow", () => {
       fn: async () => {
         const model = createModel({ context: 400_000, input: 272_000, output: 128_000 })
         const tokens = { input: 200_000, output: 20_000, reasoning: 0, cache: { read: 10_000, write: 0 } }
-        expect(await SessionCompaction.isOverflow({ tokens, model })).toBe(false)
+        expect((await SessionCompaction.isOverflow({ tokens, model })).overflow).toBe(false)
       },
     })
   })
@@ -108,7 +108,7 @@ describe("session.compaction.isOverflow", () => {
       fn: async () => {
         const model = createModel({ context: 200_000, input: 120_000, output: 10_000 })
         const tokens = { input: 50_000, output: 9_999, reasoning: 0, cache: { read: 0, write: 0 } }
-        expect(await SessionCompaction.isOverflow({ tokens, model })).toBe(false)
+        expect((await SessionCompaction.isOverflow({ tokens, model })).overflow).toBe(false)
       },
     })
   })
@@ -146,7 +146,7 @@ describe("session.compaction.isOverflow", () => {
 
         // With 198K used and only 2K headroom, the next turn will overflow.
         // Compaction MUST trigger here.
-        expect(await SessionCompaction.isOverflow({ tokens, model })).toBe(true)
+        expect((await SessionCompaction.isOverflow({ tokens, model })).overflow).toBe(true)
       },
     })
   })
@@ -166,7 +166,7 @@ describe("session.compaction.isOverflow", () => {
         // 198K > 168K = true → compaction correctly triggered
 
         const result = await SessionCompaction.isOverflow({ tokens, model })
-        expect(result).toBe(true) // ← Correct: headroom is reserved
+        expect(result.overflow).toBe(true) // ← Correct: headroom is reserved
       },
     })
   })
@@ -187,8 +187,8 @@ describe("session.compaction.isOverflow", () => {
         const withoutLimit = await SessionCompaction.isOverflow({ tokens, model: withoutInputLimit })
 
         // Both models have identical real capacity — they should agree:
-        expect(withLimit).toBe(true) // should compact (170K leaves no room for 32K output)
-        expect(withoutLimit).toBe(true) // correctly compacts (170K > 168K)
+        expect(withLimit.overflow).toBe(true) // should compact (170K leaves no room for 32K output)
+        expect(withoutLimit.overflow).toBe(true) // correctly compacts (170K > 168K)
       },
     })
   })
@@ -200,7 +200,7 @@ describe("session.compaction.isOverflow", () => {
       fn: async () => {
         const model = createModel({ context: 0, output: 32_000 })
         const tokens = { input: 100_000, output: 10_000, reasoning: 0, cache: { read: 0, write: 0 } }
-        expect(await SessionCompaction.isOverflow({ tokens, model })).toBe(false)
+        expect((await SessionCompaction.isOverflow({ tokens, model })).overflow).toBe(false)
       },
     })
   })
@@ -221,7 +221,7 @@ describe("session.compaction.isOverflow", () => {
       fn: async () => {
         const model = createModel({ context: 100_000, output: 32_000 })
         const tokens = { input: 75_000, output: 5_000, reasoning: 0, cache: { read: 0, write: 0 } }
-        expect(await SessionCompaction.isOverflow({ tokens, model })).toBe(false)
+        expect((await SessionCompaction.isOverflow({ tokens, model })).overflow).toBe(false)
       },
     })
   })

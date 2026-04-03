@@ -56,6 +56,12 @@ export namespace SessionProcessor {
             let reasoningMap: Record<string, MessageV2.ReasoningPart> = {}
             const stream = await LLM.stream(streamInput)
 
+            void HookRunner.fire(HookRunner.Event.ModelRequest, {
+              sessionID: input.sessionID,
+              messageID: input.assistantMessage.id,
+              attempt,
+            })
+
             for await (const value of stream.fullStream) {
               input.abort.throwIfAborted()
               switch (value.type) {
@@ -350,10 +356,17 @@ export namespace SessionProcessor {
                     messageID: input.assistantMessage.parentID,
                   })
                   if (
-                    !input.assistantMessage.summary &&
-                    (await SessionCompaction.isOverflow({ tokens: usage.tokens, model: input.model }))
+                    !input.assistantMessage.summary
                   ) {
-                    needsCompaction = true
+                    const { overflow } = await SessionCompaction.isOverflow({ tokens: usage.tokens, model: input.model })
+                    if (overflow) {
+                      needsCompaction = true
+                      void HookRunner.fire(HookRunner.Event.ContextThreshold, {
+                        sessionID: input.sessionID,
+                        tokens: usage.tokens,
+                        model: input.model.id,
+                      })
+                    }
                   }
                   break
 
@@ -424,6 +437,12 @@ export namespace SessionProcessor {
             log.error("process", {
               error: e,
               stack: JSON.stringify(e.stack),
+            })
+            void HookRunner.fire(HookRunner.Event.Error, {
+              sessionID: input.sessionID,
+              error: e.message ?? String(e),
+              errorType: e.name ?? "Unknown",
+              attempt,
             })
             const error = MessageV2.fromError(e, { providerID: input.model.providerID })
             if (MessageV2.ContextOverflowError.isInstance(error)) {
@@ -498,6 +517,12 @@ export namespace SessionProcessor {
           // kilocode_change end
           input.assistantMessage.time.completed = Date.now()
           await Session.updateMessage(input.assistantMessage)
+          void HookRunner.fire(HookRunner.Event.ModelResponse, {
+            sessionID: input.sessionID,
+            messageID: input.assistantMessage.id,
+            finishReason: input.assistantMessage.finish,
+            hasError: !!input.assistantMessage.error,
+          })
           if (needsCompaction) return "compact"
           if (blocked) return "stop"
           if (input.assistantMessage.error) return "stop"
