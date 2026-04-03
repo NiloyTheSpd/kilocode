@@ -41,6 +41,7 @@ import { SessionProcessor } from "./processor"
 import { TaskTool } from "@/tool/task"
 import { Tool } from "@/tool/tool"
 import { PermissionNext } from "@/permission/next"
+import { HookRunner } from "@/hook/HookRunner"
 import { SessionStatus } from "./status"
 import { LLM } from "./llm"
 import { iife } from "@/util/iife"
@@ -310,12 +311,14 @@ export namespace SessionPrompt {
 
     // kilocode_change start
     void Bus.publish(Session.Event.TurnOpen, { sessionID })
+    void HookRunner.fire(HookRunner.Event.TurnStart, { sessionID })
     let closeReason: Session.CloseReason = "completed"
     let finished = false
     using _ = defer(() => cancel(sessionID))
     await using _close = defer(async () => {
       if (!finished) closeReason = abort.aborted ? "interrupted" : "error"
       await Bus.publish(Session.Event.TurnClose, { sessionID, reason: closeReason })
+      void HookRunner.fire(HookRunner.Event.TurnEnd, { sessionID, reason: closeReason })
     })
     // kilocode_change end
 

@@ -1386,6 +1386,13 @@ export namespace Config {
           },
         ),
       instructions: z.array(z.string()).optional().describe("Additional instruction files or patterns to include"),
+      hook: z.record(z.string(), z.object({
+        command: z.string().optional().describe("Shell command to execute"),
+        url: z.string().optional().describe("HTTP endpoint to POST to"),
+        timeout: z.number().optional().describe("Timeout in milliseconds (default 5000)"),
+        continue_on_error: z.boolean().optional().describe("Continue agent loop if hook fails"),
+        env: z.record(z.string(), z.string()).optional().describe("Additional environment variables"),
+      })).optional().describe("Lifecycle hook configuration"),
       layout: Layout.optional().describe("@deprecated Always uses stretch layout."),
       permission: Permission.optional(),
       tools: z.record(z.string(), z.boolean()).optional(),

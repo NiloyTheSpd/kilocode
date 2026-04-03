@@ -17,6 +17,7 @@ import { PermissionNext } from "@/permission/next"
 import { Question } from "@/question"
 import { Telemetry } from "@kilocode/kilo-telemetry" // kilocode_change
 import { Flag } from "@/flag/flag" // kilocode_change
+import { HookRunner } from "@/hook/HookRunner" // kilocode_change
 
 export namespace SessionProcessor {
   const DOOM_LOOP_THRESHOLD = 3
@@ -252,6 +253,7 @@ export namespace SessionProcessor {
                     }
                     delete toolcalls[value.toolCallId]
                   }
+                  void HookRunner.fire(HookRunner.Event.ToolError, { sessionID: input.sessionID, tool: value.toolCallId, error: (value.error as any).toString() })
                   break
                 }
                 case "error":
@@ -267,6 +269,7 @@ export namespace SessionProcessor {
                     snapshot,
                     type: "step-start",
                   })
+                  void HookRunner.fire(HookRunner.Event.StepStart, { sessionID: input.sessionID, messageID: input.assistantMessage.id, step: attempt })
                   break
 
                 case "finish-step":
@@ -309,6 +312,7 @@ export namespace SessionProcessor {
                     cost: usage.cost,
                   })
                   await Session.updateMessage(input.assistantMessage)
+                  void HookRunner.fire(HookRunner.Event.StepEnd, { sessionID: input.sessionID, messageID: input.assistantMessage.id, tokens: usage.tokens, cost: usage.cost, finishReason: value.finishReason })
                   if (snapshot) {
                     const patch = await Snapshot.patch(snapshot)
                     if (patch.files.length) {
