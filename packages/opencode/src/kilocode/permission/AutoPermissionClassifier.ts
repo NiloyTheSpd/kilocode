@@ -1,8 +1,4 @@
-// kilocode_change - new file
-
 import z from "zod"
-import { Provider } from "@/provider/provider"
-import { Session } from "@/session"
 import { Log } from "@/util/log"
 
 export namespace AutoPermissionClassifier {
@@ -24,41 +20,85 @@ export namespace AutoPermissionClassifier {
 
   const SAFE_TOOLS = new Set([
     "read", "glob", "grep", "codesearch", "webfetch", "websearch",
-    "todoread", "question", "skill", "lsp"
+    "todoread", "question", "skill", "lsp", "ls",
   ])
 
   const DESTRUCTIVE_TOOLS = new Set([
-    "bash", "edit", "write", "patch", "multiedit"
+    "bash", "edit", "write", "patch", "multiedit",
   ])
 
-  /**
-   * Simple heuristic classifier for auto permission mode
-   * Will be replaced with LLM-based classifier in later phases
-   */
+  const SAFE_BASH_PATTERNS = [
+    /^ls\b/, /^cat\b/, /^head\b/, /^tail\b/, /^wc\b/,
+    /^find\b.*-type f\b/, /^echo\b/, /^date\b/, /^pwd\b/,
+    /^git\s+(status|log|diff|show|branch)\b/,
+    /^pnpm\s+test\b/, /^npm\s+test\b/, /^bun\s+test\b/,
+    /^yarn\s+test\b/,
+  ]
+
+  const DANGEROUS_BASH_PATTERNS = [
+    /\brm\s+(-rf?|--recursive)\b/,
+    /\bsudo\b/,
+    /\bcurl\b.*\|\s*(ba)?sh\b/,
+    /\bchmod\s+[0-7]*7[0-7]*\b/,
+    /\bchown\b/,
+    /\bmkfs\b/,
+    /\bdd\b/,
+    /\bformat\b/,
+    /\bshutdown\b/,
+    /\breboot\b/,
+  ]
+
   export async function classify(request: Request): Promise<Decision> {
-    // 1. Safe tools are always allowed with high confidence
     if (SAFE_TOOLS.has(request.tool)) {
       return {
         action: "allow",
         confidence: 0.95,
-        reason: "Safe read-only tool"
+        reason: "Safe read-only tool",
       }
     }
 
-    // 2. Destructive tools require user confirmation
+    if (request.tool === "bash" && typeof request.input.command === "string") {
+      const cmd = request.input.command.trim()
+
+      for (const pattern of DANGEROUS_BASH_PATTERNS) {
+        if (pattern.test(cmd)) {
+          return {
+            action: "deny",
+            confidence: 0.95,
+            reason: `Dangerous command pattern detected: ${cmd.slice(0, 60)}`,
+          }
+        }
+      }
+
+      for (const pattern of SAFE_BASH_PATTERNS) {
+        if (pattern.test(cmd)) {
+          return {
+            action: "allow",
+            confidence: 0.9,
+            reason: `Safe command pattern: ${cmd.slice(0, 60)}`,
+          }
+        }
+      }
+
+      return {
+        action: "deny",
+        confidence: 0.7,
+        reason: `Unknown bash command: ${cmd.slice(0, 60)}`,
+      }
+    }
+
     if (DESTRUCTIVE_TOOLS.has(request.tool)) {
       return {
         action: "deny",
         confidence: 0.9,
-        reason: "Destructive tool requires explicit approval"
+        reason: "Destructive tool requires explicit approval",
       }
     }
 
-    // 3. Default to user confirmation for unknown tools
     return {
       action: "deny",
       confidence: 0.5,
-      reason: "Unknown tool requires explicit approval"
+      reason: "Unknown tool requires explicit approval",
     }
   }
 }

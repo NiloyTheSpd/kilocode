@@ -859,6 +859,7 @@ export namespace Config {
       z
         .object({
           __originalKeys: z.string().array().optional(),
+          mode: z.enum(["bypass", "allow_edits", "auto"]).optional().describe("Permission mode: bypass, allow_edits, or auto"),
           read: PermissionRule.optional(),
           edit: PermissionRule.optional(),
           glob: PermissionRule.optional(),

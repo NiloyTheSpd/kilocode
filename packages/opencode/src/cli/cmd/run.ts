@@ -317,10 +317,21 @@ export const RunCommand = cmd({
           describe: "auto-approve all permissions (for autonomous/pipeline usage)",
           default: false,
         })
+        .option("permission-mode", {
+          type: "string",
+          describe: "permission mode: bypass, allow_edits, or auto (overrides config)",
+          choices: ["bypass", "allow_edits", "auto"] as const,
+        })
       // kilocode_change end
     )
   },
   handler: async (args) => {
+    // kilocode_change start - set permission mode env var for server to pick up
+    if (args["permission-mode"]) {
+      process.env["KILO_PERMISSION_MODE"] = args["permission-mode"]
+    }
+    // kilocode_change end
+
     let message = [...args.message, ...(args["--"] || [])]
       .map((arg) => (arg.includes(" ") ? `"${arg.replace(/"/g, '\\"')}"` : arg))
       .join(" ")

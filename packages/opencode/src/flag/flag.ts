@@ -68,6 +68,11 @@ export namespace Flag {
 
   export const KILO_SESSION_RETRY_LIMIT = number("KILO_SESSION_RETRY_LIMIT")
   export const KILO_PERMISSION_MODE = process.env["KILO_PERMISSION_MODE"]
+  export const KILO_MAX_TURNS = number("KILO_MAX_TURNS")
+  export const KILO_ALLOWED_TOOLS = process.env["KILO_ALLOWED_TOOLS"]
+  export const KILO_OUTPUT_FORMAT = process.env["KILO_OUTPUT_FORMAT"]
+  export const KILO_BARE = truthy("KILO_BARE")
+  export const KILO_CHANNELS = process.env["KILO_CHANNELS"]
 }
 
 // Dynamic getter for KILO_DISABLE_PROJECT_CONFIG
