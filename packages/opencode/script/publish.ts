@@ -44,6 +44,10 @@ await Bun.file(`./dist/${pkg.name}/package.json`).write(
         type: "git",
         url: "https://github.com/Kilo-Org/kilocode",
       },
+      publishConfig: {
+        provenance: true,
+        access: "public",
+      },
       // kilocode_change end
     },
     null,
