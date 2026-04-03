@@ -14,6 +14,15 @@ import { Log } from "@/util/log"
 
 const log = Log.create({ service: "claw-chat" })
 
+function sanitizeForLog(obj: Record<string, unknown>): Record<string, unknown> {
+  const sensitiveKeys = ["apiKey", "token", "secret", "password", "authorization", "accessToken", "refreshToken"]
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) =>
+      sensitiveKeys.some((s) => k.toLowerCase().includes(s)) ? [k, "[REDACTED]"] : [k, v],
+    ),
+  )
+}
+
 /**
  * Poll the KiloClaw instance status every `interval` ms.
  * Returns a reactive signal with the latest status.
@@ -97,12 +106,12 @@ export function createClawChat(sdk: any) {
       return null
     })
 
-    log.info("credentials response", {
+    log.info("credentials response", sanitizeForLog({
       hasData: String(!!res?.data),
       dataIsNull: String(res?.data === null),
       error: res?.error ? String(res.error) : "none",
       dataKeys: res?.data ? Object.keys(res.data).join(",") : "none",
-    })
+    }))
 
     if (!res?.data || res.error) {
       setError(res?.data === null ? null : "Failed to fetch chat credentials")

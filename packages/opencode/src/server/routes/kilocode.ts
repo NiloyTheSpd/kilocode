@@ -9,6 +9,7 @@ import { Agent } from "../../agent/agent"
 import { lazy } from "../../util/lazy"
 import { errors } from "../error"
 import { SessionImportRoutes } from "../../kilocode/session-import/routes"
+import { isPathWithinAllowedDirs } from "../../util/path-safety"
 
 export const KilocodeRoutes = lazy(() =>
   new Hono()
@@ -39,6 +40,10 @@ export const KilocodeRoutes = lazy(() =>
       ),
       async (c) => {
         const { location } = c.req.valid("json")
+        const isValid = await isPathWithinAllowedDirs(location)
+        if (!isValid) {
+          return c.json({ error: { message: "Path traversal detected: access denied" } }, 400)
+        }
         await Skill.remove(location)
         return c.json(true)
       },

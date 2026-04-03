@@ -14,6 +14,7 @@ export interface ServerInstance {
 }
 
 const STARTUP_TIMEOUT_SECONDS = 30
+const GRACEFUL_SHUTDOWN_TIMEOUT_MS = 5000
 
 export class ServerManager {
   private instance: ServerInstance | null = null
@@ -194,7 +195,7 @@ export class ServerManager {
         console.warn("[Kilo New] ServerManager: ⚠️ Process did not exit after SIGTERM, sending SIGKILL")
         ServerManager.killProcess(proc, "SIGKILL")
       }
-    }, 5000)
+    }, GRACEFUL_SHUTDOWN_TIMEOUT_MS)
     // unref so this timer doesn't prevent the extension host from exiting
     timer.unref()
     proc.on("exit", () => clearTimeout(timer))

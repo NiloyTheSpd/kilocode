@@ -20,6 +20,7 @@ type DirectoryProvider = () => string[]
 // Poll /global/health at the same interval as packages/app/src/context/server.tsx.
 // This provides a second detection channel for server death independent of the SSE heartbeat.
 const HEALTH_POLL_INTERVAL_MS = 10_000
+const HEALTH_CHECK_TIMEOUT_MS = 3000
 
 /**
  * Shared connection service that owns the single ServerManager, KiloClient (SDK), and SdkSSEAdapter.
@@ -410,7 +411,7 @@ export class KiloConnectionService {
   private async checkHealth(baseUrl: string, password: string): Promise<boolean> {
     try {
       const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), 3000)
+      const timer = setTimeout(() => controller.abort(), HEALTH_CHECK_TIMEOUT_MS)
       const res = await fetch(`${baseUrl}/global/health`, {
         headers: { Authorization: `Basic ${Buffer.from(`kilo:${password}`).toString("base64")}` },
         signal: controller.signal,

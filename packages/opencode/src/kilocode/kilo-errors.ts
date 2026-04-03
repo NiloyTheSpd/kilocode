@@ -79,6 +79,10 @@ export function parseKiloErrorCode(error: ReturnType<NamedError["toObject"]>): K
     if (typeof code === "string" && KILO_ERROR_CODE_VALUES.includes(code)) {
       return code as KiloErrorCode
     }
-  } catch {}
+  } catch (e) {
+    if (!(e instanceof SyntaxError)) {
+      throw e
+    }
+  }
   return undefined
 }
