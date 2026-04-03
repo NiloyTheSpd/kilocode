@@ -106,7 +106,7 @@ Scheduled trigger invocations appear in the same request history as webhooks. Th
 Create a scheduled trigger that fires every weekday morning and asks your agent to summarize overnight activity:
 
 1. Add a scheduled trigger in your KiloClaw Settings
-2. Set the frequency to **Daily** at **9:00 AM** in your local timezone
+2. Set the frequency to **Weekly** on **Monday through Friday** at **9:00 AM** in your local timezone
 3. Customize the prompt template:
 
 ```
