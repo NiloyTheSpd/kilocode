@@ -1,5 +1,6 @@
 import path from "path"
 import z from "zod"
+import { parse as parseJsonc, type ParseError } from "jsonc-parser"
 import { Filesystem } from "@/util/filesystem"
 import { Config } from "@/config/config"
 import { Log } from "@/util/log"
@@ -59,7 +60,12 @@ export namespace McpConfig {
   async function loadFile(filePath: string): Promise<Settings | null> {
     try {
       const content = await Filesystem.readText(filePath)
-      const parsed = JSON.parse(content)
+      const errors: ParseError[] = []
+      const parsed = parseJsonc(content, errors)
+      if (errors.length > 0) {
+        log.warn("JSONC parse errors in MCP config", { file: filePath, errors: errors.length })
+        return null
+      }
       return Settings.parse(parsed)
     } catch {
       return null

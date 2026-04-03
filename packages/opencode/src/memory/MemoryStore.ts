@@ -1,5 +1,5 @@
 import { Instance } from "@/project/instance"
-import { Database, eq, like } from "@/storage/db"
+import { Database, eq } from "@/storage/db"
 import { MemoryTable } from "@/memory/memory.sql"
 import { MemoryType } from "./MemoryType"
 import { Log } from "@/util/log"

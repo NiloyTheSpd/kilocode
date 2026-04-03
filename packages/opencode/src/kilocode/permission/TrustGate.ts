@@ -37,20 +37,10 @@ export namespace TrustGate {
     const trustStatus = await check(directory)
 
     if (trustStatus === "untrusted") {
-      log.info("loading config without project permission rules for untrusted directory", { directory })
-      const config = await Config.get()
-      if (config.permission) {
-        const filtered: Config.Permission = {}
-        for (const [key, value] of Object.entries(config.permission)) {
-          if (key === "mode") {
-            filtered[key as keyof Config.Permission] = value as never
-            continue
-          }
-          if (key === "__originalKeys") continue
-        }
-        config.permission = filtered
-      }
-      return config
+      log.info(
+        "directory is untrusted, but permission rules are loaded from merged config and cannot be filtered by source here",
+        { directory },
+      )
     }
 
     return Config.get()

@@ -4,7 +4,6 @@ import { MessageV2 } from "@/session/message-v2"
 import { Agent } from "@/agent/agent"
 import { Provider } from "@/provider/provider"
 import { PermissionNext } from "@/permission/next"
-import { Identifier } from "@/id/id"
 import { Instance } from "@/project/instance"
 import { Config } from "@/config/config"
 import { Log } from "@/util/log"
@@ -80,20 +79,27 @@ export namespace SubagentRunner {
     })
 
     try {
+      const toolsConfig = spec.allowed_tools
+        ? {
+          ...Object.fromEntries(spec.allowed_tools.map((t) => [t, true])),
+        }
+        : undefined
+
       const promptPromise = SessionPrompt.prompt({
         sessionID: childSession.id,
         agent: spec.subagent_type,
         model: resolved,
         parts: [{ type: "text", text: spec.prompt }],
-        tools: spec.allowed_tools
-          ? Object.fromEntries(spec.allowed_tools.map((t) => [t, true]))
-          : undefined,
+        tools: toolsConfig,
       })
 
       let result: Result
       if (spec.timeout_ms) {
         const timeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error(`Subagent timed out after ${spec.timeout_ms}ms`)), spec.timeout_ms),
+          setTimeout(async () => {
+            await SessionPrompt.cancel(childSession.id)
+            reject(new Error(`Subagent timed out after ${spec.timeout_ms}ms`))
+          }, spec.timeout_ms),
         )
         result = await Promise.race([promptPromise.then(() => extractResult(childSession.id)), timeout.then(() => ({
           output: `Subagent timed out after ${spec.timeout_ms}ms`,
@@ -158,6 +164,13 @@ export namespace SubagentRunner {
       { permission: "task", pattern: "*", action: "deny" },
     ]
 
+    if (spec.allowed_tools && spec.allowed_tools.length > 0) {
+      defaults.push({ permission: "*", pattern: "*", action: "deny" })
+      for (const tool of spec.allowed_tools) {
+        defaults.push({ permission: tool, pattern: "*", action: "allow" })
+      }
+    }
+
     return PermissionNext.merge(
       defaults,
       PermissionNext.fromConfig({
@@ -190,7 +203,7 @@ export namespace SubagentRunner {
     const lastAssistant = assistantMsgs[assistantMsgs.length - 1]
 
     const textParts = lastAssistant?.parts?.filter((p) => p.type === "text") ?? []
-    const output = textParts.map((p) => (p as any).content ?? "").join("\n")
+    const output = textParts.map((p) => ("text" in p ? p.text : "")).join("\n")
 
     return {
       output: output || "<task_result>No output</task_result>",

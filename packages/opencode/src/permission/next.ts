@@ -13,7 +13,6 @@ import { drainCovered } from "@/kilocode/permission/drain" // kilocode_change
 import { ConfigProtection } from "@/kilocode/permission/config-paths" // kilocode_change
 import { PermissionMode } from "@/kilocode/permission/PermissionMode" // kilocode_change
 import { AutoPermissionClassifier } from "@/kilocode/permission/AutoPermissionClassifier" // kilocode_change
-import { TrustGate } from "@/kilocode/permission/TrustGate" // kilocode_change
 import os from "os"
 import z from "zod"
 

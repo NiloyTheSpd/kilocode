@@ -1,7 +1,4 @@
-import { Log } from "@/util/log"
-
 export namespace StreamFormatter {
-  const log = Log.create({ service: "stream" })
 
   export type Format = "text" | "json" | "stream-json"
 

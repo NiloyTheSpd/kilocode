@@ -2,6 +2,7 @@ import { z } from "zod"
 
 export namespace SubagentSpec {
   export const Spec = z.object({
+    id: z.string().describe("Unique task ID for dependency tracking"),
     description: z.string().describe("A short (3-5 words) description of the task"),
     prompt: z.string().describe("The task for the agent to perform"),
     subagent_type: z.string().describe("The type of specialized agent to use for this task"),
@@ -41,13 +42,13 @@ export namespace SubagentSpec {
       if (ready.length === 0) {
         remaining.forEach((s) => {
           waves.push({ id: crypto.randomUUID(), tasks: [s] })
-          resolved.add(s.description)
+          resolved.add(s.id)
         })
         break
       }
 
       waves.push({ id: crypto.randomUUID(), tasks: ready })
-      ready.forEach((s) => resolved.add(s.description))
+      ready.forEach((s) => resolved.add(s.id))
 
       for (const s of ready) {
         const idx = remaining.indexOf(s)

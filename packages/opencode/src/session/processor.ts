@@ -176,6 +176,13 @@ export namespace SessionProcessor {
                     })
                     toolcalls[value.toolCallId] = part as MessageV2.ToolPart
 
+                    void HookRunner.fire(HookRunner.Event.ToolBefore, {
+                      sessionID: input.sessionID,
+                      tool: value.toolName,
+                      toolCallId: value.toolCallId,
+                      input: value.input,
+                    })
+
                     const parts = await MessageV2.parts(input.assistantMessage.id)
                     const lastThree = parts.slice(-DOOM_LOOP_THRESHOLD)
 
@@ -225,6 +232,12 @@ export namespace SessionProcessor {
                     })
 
                     delete toolcalls[value.toolCallId]
+                    void HookRunner.fire(HookRunner.Event.ToolAfter, {
+                      sessionID: input.sessionID,
+                      tool: value.toolName,
+                      toolCallId: value.toolCallId,
+                      output_length: value.output?.output?.length ?? 0,
+                    })
                   }
                   break
                 }
@@ -253,7 +266,12 @@ export namespace SessionProcessor {
                     }
                     delete toolcalls[value.toolCallId]
                   }
-                  void HookRunner.fire(HookRunner.Event.ToolError, { sessionID: input.sessionID, tool: value.toolCallId, error: (value.error as any).toString() })
+                  void HookRunner.fire(HookRunner.Event.ToolError, {
+                    sessionID: input.sessionID,
+                    tool: value.toolName,
+                    toolCallId: value.toolCallId,
+                    error: (value.error as any).toString(),
+                  })
                   break
                 }
                 case "error":

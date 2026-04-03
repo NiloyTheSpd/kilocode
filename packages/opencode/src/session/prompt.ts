@@ -885,8 +885,11 @@ export namespace SessionPrompt {
       input.agent,
     )) {
       // kilocode_change start - filter tools by allowed-tools list
-      if (Flag.KILO_ALLOWED_TOOLS && !Flag.KILO_ALLOWED_TOOLS.includes(item.id)) {
-        continue
+      if (Flag.KILO_ALLOWED_TOOLS) {
+        const allowedSet = new Set(Flag.KILO_ALLOWED_TOOLS.split(",").map((t) => t.trim().toLowerCase()))
+        if (!allowedSet.has(item.id.toLowerCase())) {
+          continue
+        }
       }
       // kilocode_change end
       const schema = ProviderTransform.schema(input.model, z.toJSONSchema(item.parameters))
